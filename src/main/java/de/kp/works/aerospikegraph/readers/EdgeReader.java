@@ -28,7 +28,10 @@ import org.apache.tinkerpop.gremlin.structure.Edge;
 
 import java.util.HashMap;
 import java.util.Map;
-
+/**
+ * [EdgeReader] retrieves a query result and transforms
+ * the data into an edge representation.
+ */
 public class EdgeReader extends LoadingElementReader<Edge> {
 
     public EdgeReader(AeroGraph graph) {
@@ -37,9 +40,16 @@ public class EdgeReader extends LoadingElementReader<Edge> {
 
     @Override
     public Edge parse(AeroResult result) {
+        /*
+         * Retrieve an edge template that matches
+         * the provided id, either from cache or
+         * as a new one and load respective fields
+         * from query result.
+         */
         Object id = result.getId();
         Edge edge = graph.findOrCreateEdge(id);
         load(edge, result);
+
         return edge;
     }
 

@@ -29,7 +29,7 @@ import java.util
 
 case class KeyRecord(key:Key, record:Record)
 
-class AeroScanCallback() extends ScanCallback with util.Iterator[KeyRecord] {
+class AeroScanIterator() extends ScanCallback with util.Iterator[KeyRecord] {
 
   private var thread:Thread = _
   /*
@@ -107,7 +107,7 @@ class AeroScanCallback() extends ScanCallback with util.Iterator[KeyRecord] {
 
 
     } finally {
-      nextKeyRecord = null
+      nextKeyRecord = TERMINATE_VALUE
     }
 
     nextKeyRecord
@@ -133,7 +133,7 @@ class AeroScan(
   scanPolicy.socketTimeout = socketTimeout
   scanPolicy.totalTimeout = readTimeout
 
-  private val callback = new AeroScanCallback()
+  private val scanIterator = new AeroScanIterator()
 
   def run(scanThreadFactory:NamedThreadFactory): util.Iterator[KeyRecord] = {
 
@@ -143,22 +143,22 @@ class AeroScan(
           try {
 
             /* Run scan operation for the provided namespace & set */
-            client.scanAll(scanPolicy, namespace, setname, callback)
+            client.scanAll(scanPolicy, namespace, setname, scanIterator)
 
           } catch {
             case t:Throwable => throw t
 
           } finally {
-            callback.close()
+            scanIterator.close()
           }
         }
       }
     )
 
-    callback.setThread(scanThread)
+    scanIterator.setThread(scanThread)
     scanThread.start()
 
-    callback
+    scanIterator
 
   }
 

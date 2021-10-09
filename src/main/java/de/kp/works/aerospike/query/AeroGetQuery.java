@@ -59,6 +59,11 @@ public class AeroGetQuery extends AeroQuery {
     @Override
     protected Iterator<KeyRecord> getKeyRecords() {
         String[] userKeys = fields.get(Constants.ID_COL_NAME).split(",");
+        /*
+         * We use the special Aerospike read operation
+         * as the ID column directly refers to the user
+         * key.
+         */
         return connect.getByKeys(userKeys, elementType);
     }
 }

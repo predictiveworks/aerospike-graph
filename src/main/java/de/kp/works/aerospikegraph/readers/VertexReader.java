@@ -28,7 +28,10 @@ import org.apache.tinkerpop.gremlin.structure.Vertex;
 
 import java.util.HashMap;
 import java.util.Map;
-
+/**
+ * [VertexReader] retrieves a query result and transforms
+ * the data into a vertex representation.
+ */
 public class VertexReader extends LoadingElementReader<Vertex> {
 
     public VertexReader(AeroGraph graph) {
@@ -37,6 +40,12 @@ public class VertexReader extends LoadingElementReader<Vertex> {
 
     @Override
     public Vertex parse(AeroResult result) {
+        /*
+         * Retrieve a vertex template that matches
+         * the provided id, either from cache or
+         * as a new one and load respective fields
+         * from query result.
+         */
         Object id = result.getId();
         Vertex vertex = graph.findOrCreateVertex(id);
         load(vertex, result);

@@ -20,6 +20,7 @@ package de.kp.works.aerospike
 
 import com.aerospike.client.{AerospikeClient, Bin, Host, Key}
 import com.aerospike.client.policy.{ClientPolicy, RecordExistsAction, TlsPolicy, WritePolicy}
+import com.aerospike.client.query.Filter
 import de.kp.works.aerospike.util.NamedThreadFactory
 import de.kp.works.aerospikegraph.{Constants, ElementType}
 import org.apache.commons.configuration2.PropertiesConfiguration
@@ -129,6 +130,16 @@ class AeroConnect(options:AeroOptions) {
    */
   def removeAll(keys:util.List[Key]):Unit = {
     keys.foreach(key => client.delete(writePolicy, key))
+  }
+
+  def query(queryset:String, filters:AeroFilters):util.Iterator[KeyRecord] = {
+    val aeroRead = new AeroRead(client, namespace, queryset, timeout, timeout)
+    aeroRead.run(filters, Seq.empty[String])
+  }
+
+  def query(queryset:String, filters:AeroFilters, binNames:Seq[String]):util.Iterator[KeyRecord] = {
+    val aeroRead = new AeroRead(client, namespace, queryset, timeout, timeout)
+    aeroRead.run(filters, binNames)
   }
 
   def scan(scanset:String):util.Iterator[KeyRecord] = {

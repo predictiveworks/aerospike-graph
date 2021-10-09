@@ -19,11 +19,15 @@ package de.kp.works.aerospike.query;
  */
 
 import de.kp.works.aerospike.AeroConnect;
+import de.kp.works.aerospike.AeroFilter;
+import de.kp.works.aerospike.AeroFilters;
 import de.kp.works.aerospike.KeyRecord;
 import de.kp.works.aerospikegraph.Constants;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 
 public class AeroLabelQuery extends AeroQuery {
     /**
@@ -36,30 +40,28 @@ public class AeroLabelQuery extends AeroQuery {
          * Transform the provided properties into fields
          */
         fields = new HashMap<>();
-
         fields.put(Constants.LABEL_COL_NAME, label);
 
     }
 
     @Override
     protected Iterator<KeyRecord> getKeyRecords() {
-        return null;
+        /*
+         * The query logic demands for records that have
+         * label value equal to the specified one.
+         */
+        List<AeroFilter> filters = new ArrayList<>();
+        filters.add(
+                new AeroFilter("equal", Constants.LABEL_COL_NAME,
+                        fields.get(Constants.LABEL_COL_NAME)));
+
+        return connect
+                /*
+                 * Aerospike read query with a single
+                 * filter condition
+                 */
+                .query(setname, new AeroFilters("and", filters));
+
     }
 
-//    @Override
-//    protected void createSql(Map<String, String> fields) {
-//        try {
-//            buildSelectPart();
-//            /*
-//             * Build the `clause` of the SQL statement
-//             * from the provided fields
-//             */
-//            sqlStatement += " where " + IgniteConstants.LABEL_COL_NAME;
-//            sqlStatement += " = '" + fields.get(IgniteConstants.LABEL_COL_NAME) + "'";
-//
-//        } catch (Exception e) {
-//            sqlStatement = null;
-//        }
-//
-//    }
 }

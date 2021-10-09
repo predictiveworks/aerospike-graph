@@ -1,4 +1,4 @@
-package de.kp.works.aerospikegraph.readers;
+package de.kp.works.aerospike
 /*
  * Copyright (c) 2019 - 2021 Dr. Krusche & Partner PartG. All rights reserved.
  *
@@ -18,16 +18,19 @@ package de.kp.works.aerospikegraph.readers;
  *
  */
 
-import de.kp.works.aerospikegraph.AeroGraph;
-import org.apache.tinkerpop.gremlin.structure.Element;
-/**
- * The common base class for edge and vertex readers
- */
-public abstract class ElementReader<T extends Element> implements Reader<T> {
+import java.util
+import scala.collection.JavaConversions._
 
-    protected final AeroGraph graph;
+case class AeroFilters(condition:String, filters:util.List[AeroFilter]) {
 
-    public ElementReader(AeroGraph graph) {
-        this.graph = graph;
-    }
+  def head:AeroFilter = filters.head
+
+  def nonEmpty:Boolean = filters.nonEmpty
+
+  def size:Int = filters.size
+
+  def tail:Seq[AeroFilter] = filters.tail
+
 }
+
+case class AeroFilter(condition:String, name:String, value:String)
