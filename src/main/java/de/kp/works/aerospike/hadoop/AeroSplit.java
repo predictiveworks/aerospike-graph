@@ -39,30 +39,25 @@ public class AeroSplit extends InputSplit implements
     private long numRangeBegin;
     private long numRangeEnd;
 
-    AeroSplit() {
-    }
-
-    public AeroSplit(
-            String type,
-            String node,
-            String host,
-            int port,
-            String namespace,
-            String setname,
-            String[] binNames,
-            String numRangeBin,
-            long numRangeBegin,
-            long numRangeEnd) {
-        this.type = type;
+    public AeroSplit(String node, String host, int port, AeroConfig config) {
+        /*
+         * Node specific parameters
+         */
         this.node = node;
         this.host = host;
         this.port = port;
-        this.namespace = namespace;
-        this.setname = setname;
-        this.binNames = binNames;
-        this.numRangeBin = numRangeBin;
-        this.numRangeBegin = numRangeBegin;
-        this.numRangeEnd = numRangeEnd;
+        /*
+         * Common parameters
+         */
+        this.type = config.getInputOperation();
+
+        this.namespace = config.getInputNamespace();
+        this.setname = config.getInputSetName();
+        this.binNames = config.getInputBinNames();
+
+        this.numRangeBin = config.getInputNumRangeBin();
+        this.numRangeBegin = config.getInputNumRangeBegin();
+        this.numRangeEnd = config.getInputNumRangeEnd();
     }
 
     public String getType() {

@@ -18,43 +18,99 @@ package de.kp.works.aerospike.hadoop;
  *
  */
 
+import com.aerospike.client.AerospikeClient;
+import com.aerospike.client.Host;
+import com.aerospike.client.cluster.Node;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.mapred.InputSplit;
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.mapreduce.InputFormat;
+import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.JobContext;
+import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
+/**
+ * This class is built to work with the NewHadoopRDD
+ * of Apache Spark.
+ */
 public class AeroInputFormat
         extends InputFormat<AeroKey, AeroRecord>
         implements org.apache.hadoop.mapred.InputFormat<AeroKey,AeroRecord> {
 
     private static final Log log =
             LogFactory.getLog(AeroInputFormat.class);
+   /**
+    * This method is also part of the new Hadoop API
+    * leveraged by Apache Spark.
+    *
+    */
+   @Override
+   public RecordReader<AeroKey, AeroRecord> createRecordReader(
+           InputSplit inputSplit, TaskAttemptContext taskAttemptContext) throws IOException {
+       return new AeroRecordReader((AeroSplit) inputSplit);
+   }
 
+   /**
+    * This method supports the new Hadoop API leveraged by Apache Spark.
+    * Is is used as a wrapper to delegate requests to the old API.
+    */
+   @Override
+   public List<InputSplit> getSplits(JobContext jobContext) throws IOException {
+
+        AeroConfig cfg = new AeroConfig(jobContext.getConfiguration());
+
+        // TODO
+        AerospikeClient client = null;
+        /*
+         * Build input split with respect to the
+         * existing Aerospike cluster nodes
+         */
+        Node[] nodes = client.getNodes();
+
+        int numSplits = nodes.length;
+        if (numSplits == 0) {
+            throw new IOException("No Aerospike cluster nodes available.");
+        }
+
+        log.info(String.format("%d Aerospike cluster node(s) found.", numSplits));
+        AeroSplit[] splits = new AeroSplit[numSplits];
+        for (int i = 0; i < numSplits; i++) {
+
+            Node node = nodes[i];
+            String name = node.getName();
+            Host host = node.getHost();
+
+            splits[i] = new AeroSplit(name, host.name, host.port, cfg);
+
+        }
+
+        return Arrays.asList(splits);
+
+    }
+
+    /** OLD HADOOP API
+     *
+     * This API is not used by [NewHadoopRDD]
+     */
     @Override
-    public InputSplit[] getSplits(JobConf jobConf, int i) throws IOException {
-        return new InputSplit[0];
+    public org.apache.hadoop.mapred.InputSplit[] getSplits(JobConf jobConf, int i) throws IOException {
+        return new org.apache.hadoop.mapred.InputSplit[0];
     }
 
     @Override
-    public RecordReader<AeroKey, AeroRecord> getRecordReader(InputSplit inputSplit, JobConf jobConf, Reporter reporter) throws IOException {
-        return null;
+    public org.apache.hadoop.mapred.RecordReader<AeroKey, AeroRecord> getRecordReader(
+            org.apache.hadoop.mapred.InputSplit inputSplit, JobConf jobConf, Reporter reporter) {
+        /*
+         * Dummy constructor to satisfy the requirements
+         * of the old Hadoop API.
+         */
+        return new AeroRecordReader();
     }
 
-    @Override
-    public List<org.apache.hadoop.mapreduce.InputSplit> getSplits(JobContext jobContext) throws IOException, InterruptedException {
-        return null;
-    }
-
-    @Override
-    public org.apache.hadoop.mapreduce.RecordReader<AeroKey, AeroRecord> createRecordReader(org.apache.hadoop.mapreduce.InputSplit inputSplit, TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
-        return null;
-    }
 }

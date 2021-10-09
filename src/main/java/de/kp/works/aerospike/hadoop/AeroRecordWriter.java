@@ -20,9 +20,11 @@ package de.kp.works.aerospike.hadoop;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.apache.hadoop.util.Progressable;
 
 import java.io.IOException;
 
@@ -33,18 +35,43 @@ public class AeroRecordWriter extends
     private static final Log log = LogFactory
             .getLog(AeroRecordWriter.class);
 
+    protected final Configuration cfg;
+
+    @SuppressWarnings("unused")
+    private Progressable progressable;
+    /**
+     * Flag to indicate whether the connection to
+     * the Aerospike database was initialized
+     */
+    protected boolean initialized = false;
+
+    public AeroRecordWriter(Configuration cfg, Progressable progressable) {
+        this.cfg = cfg;
+        this.progressable = progressable;
+    }
+
     @Override
     public void close(Reporter reporter) throws IOException {
 
     }
 
     @Override
-    public void write(AeroKey aeroKey, AeroRecord aeroRecord) throws IOException {
-
+    public void close(TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
     }
 
     @Override
-    public void close(TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
+    public void write(AeroKey aeroKey, AeroRecord aeroRecord) throws IOException {
+
+        if (!initialized) {
+            initialized = initialize();
+        }
 
     }
+
+    /** HELPER METHODS **/
+
+    protected Boolean initialize() throws IOException {
+        return false;
+    }
+
 }

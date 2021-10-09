@@ -33,6 +33,27 @@ public class AeroRecordReader extends
     private static final Log log = LogFactory
             .getLog(AeroRecordReader.class);
 
+    /** OLD HADOOP API
+     *
+     * This API is not used by [NewHadoopRDD]
+     */
+    public AeroRecordReader() {
+        log.info("Construct Aerospike record reader from old API.");
+    }
+
+    public AeroRecordReader(AeroSplit split) throws IOException {
+        log.info("Construct Aerospike record reader from the old API.");
+        prepare(split);
+    }
+
+    /** INTERNAL METHODS **/
+
+    private void prepare(AeroSplit split) throws IOException {
+        // TODO
+    }
+
+    /** INTERFACE METHODS **/
+
     @Override
     public boolean next(AeroKey aeroKey, AeroRecord aeroRecord) throws IOException {
         return false;
