@@ -25,6 +25,7 @@ import com.aerospike.client.query.{Filter, Statement}
 import java.util
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.atomic.AtomicBoolean
+import scala.collection.JavaConversions._
 
 class AeroReadIterator extends util.Iterator[KeyRecord] {
   /*
@@ -128,23 +129,41 @@ class AeroRead(
      * Aerospike (see documentation) currently only
      * supports a single filter for queries.
      */
-    val remaining =
-      if (filters.size < 2) Seq.empty[AeroFilter] else filters.tail
+    var remaining = Seq.empty[AeroFilter]
 
     if (filters.nonEmpty) {
-      /*
-       * Build Aerospike filter
-       */
-      val filter = filters.head
-      filter.condition match {
-        case "equal" =>
-          val f = Filter.equal(filter.name, filter.value)
-          stmt.setFilter(f)
+      filters.condition match {
+        case "and" =>
+          /*
+           * Extract the remaining filter conditions
+           * that must be applied to the query result
+           */
+          remaining =
+            if (filters.size < 2) Seq.empty[AeroFilter] else filters.tail
+          /*
+           * In case of an `and` condition we assign
+           * the first (head) filter to query statement
+           */
+          val filter = filters.head
+          filter.condition match {
+            case "equal" =>
+              val f = Filter.equal(filter.name, filter.value)
+              stmt.setFilter(f)
+            case _ =>
+              throw new Exception(s"Filter condition `${filter.condition} is not supported.")
+          }
+        case "or" =>
+          /*
+           * In case of and `or` condition, we cannot
+           * assign any filter to the statement, but
+           * must apply all condition to the query result
+           */
         case _ =>
-          throw new Exception(s"Filter condition `${filter.condition} is not supported.")
-      }
+          throw new Exception(s"Filters condition `${filters.condition} is not supported.")
 
+      }
     }
+
     if (binNames.nonEmpty) stmt.setBinNames(binNames: _*)
     /*
      * Retrieve read cursor
@@ -185,6 +204,28 @@ class AeroRead(
 
               if (matches.sum == 0)
                 readIterator.put(KeyRecord(key, record))
+
+            case "or" =>
+              /*
+               * The filter conditions have to be applied
+               * to the query result
+               */
+              var matches = 0
+              filters.filters.foreach(filter => {
+                filter.condition match {
+                  case "equal" =>
+                    if (record.getString(filter.name) == filter.name)
+                      matches += 1
+
+                  case _ =>
+                    throw new Exception(s"Filter condition `${filter.condition} is not supported.")
+                }
+
+              })
+
+              if (matches > 0)
+                readIterator.put(KeyRecord(key, record))
+
             case _ =>
               throw new Exception(s"Filters condition `${filters.condition} is not supported.")
 

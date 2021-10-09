@@ -19,11 +19,15 @@ package de.kp.works.aerospike.query;
  */
 
 import de.kp.works.aerospike.AeroConnect;
+import de.kp.works.aerospike.AeroFilter;
+import de.kp.works.aerospike.AeroFilters;
 import de.kp.works.aerospike.KeyRecord;
 import de.kp.works.aerospikegraph.Constants;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 
 public class AeroPropertyQuery extends AeroQuery {
     /**
@@ -47,32 +51,29 @@ public class AeroPropertyQuery extends AeroQuery {
 
     @Override
     protected Iterator<KeyRecord> getKeyRecords() {
-        return null;
-    }
+        /*
+         * The query logic demands for records that have
+         * the specified label as well as the property
+         */
+        List<AeroFilter> filters = new ArrayList<>();
+        filters.add(
+                new AeroFilter("equal", Constants.LABEL_COL_NAME,
+                        fields.get(Constants.LABEL_COL_NAME)));
 
-//    @Override
-//    protected void createSql(Map<String, String> fields) {
-//        try {
-//
-//            buildSelectPart();
-//            /*
-//             * Build the `clause` of the SQL statement
-//             * from the provided fields
-//             */
-//            sqlStatement += " where " + IgniteConstants.LABEL_COL_NAME;
-//            sqlStatement += " = '" + fields.get(IgniteConstants.LABEL_COL_NAME) + "'";
-//
-//            sqlStatement += " and " + IgniteConstants.PROPERTY_KEY_COL_NAME;
-//            sqlStatement += " = '" + fields.get(IgniteConstants.PROPERTY_KEY_COL_NAME) + "'";
-//            /*
-//             * The value column must match the provided value
-//             */
-//            sqlStatement += " and " + IgniteConstants.PROPERTY_VALUE_COL_NAME;
-//            sqlStatement += " = '" + fields.get(IgniteConstants.PROPERTY_VALUE_COL_NAME) + "'";
-//
-//        } catch (Exception e) {
-//            sqlStatement = null;
-//        }
-//
-//    }
+        filters.add(
+                new AeroFilter("equal", Constants.PROPERTY_KEY_COL_NAME,
+                        fields.get(Constants.PROPERTY_KEY_COL_NAME)));
+
+        filters.add(
+                new AeroFilter("equal", Constants.PROPERTY_VALUE_COL_NAME,
+                        fields.get(Constants.PROPERTY_VALUE_COL_NAME)));
+
+        return connect
+                /*
+                 * Aerospike read query with three filter
+                 * conditions combined with `and`.
+                 */
+                .query(setname, new AeroFilters("and", filters));
+
+    }
 }

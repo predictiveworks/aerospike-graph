@@ -19,11 +19,15 @@ package de.kp.works.aerospike.query;
  */
 
 import de.kp.works.aerospike.AeroConnect;
+import de.kp.works.aerospike.AeroFilter;
+import de.kp.works.aerospike.AeroFilters;
 import de.kp.works.aerospike.KeyRecord;
 import de.kp.works.aerospikegraph.Constants;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 
 public class AeroEdgesExistQuery extends AeroQuery {
 
@@ -40,30 +44,27 @@ public class AeroEdgesExistQuery extends AeroQuery {
 
     @Override
     protected Iterator<KeyRecord> getKeyRecords() {
-        return null;
-    }
+        /*
+         * The query logic demands for records that have
+         * from or to value equal to the specified one.
+         */
+        List<AeroFilter> filters = new ArrayList<>();
+        filters.add(
+                new AeroFilter("equal", Constants.FROM_COL_NAME,
+                        fields.get(Constants.FROM_COL_NAME)));
 
-/*
-    @Override
-    protected void createSql(Map<String, String> fields) {
-        try {
-            buildSelectPart();
-            */
-/*
-             * Build `where` clause
-             *//*
+        filters.add(
+                new AeroFilter("equal", Constants.TO_COL_NAME,
+                        fields.get(Constants.TO_COL_NAME)));
 
-            sqlStatement += " where " + IgniteConstants.TO_COL_NAME;
-            sqlStatement += " = '" + fields.get(IgniteConstants.TO_COL_NAME) + "'";
+        return connect
+                /*
+                 * Aerospike read query with two filter
+                 * conditions combined with `or`.
+                 */
+                .query(setname, new AeroFilters("or", filters));
 
-            sqlStatement += " or " + IgniteConstants.FROM_COL_NAME;
-            sqlStatement += " = '" + fields.get(IgniteConstants.FROM_COL_NAME) + "'";
-
-        } catch (Exception e) {
-            sqlStatement = null;
-        }
 
     }
-*/
 
 }
