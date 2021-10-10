@@ -19,15 +19,74 @@ package de.kp.works.aerospike.dataframe
  */
 
 import de.kp.works.aerospike.hadoop.{AeroInputFormat, AeroKey, AeroRecord}
-import de.kp.works.aerospikegraph.Constants
+import de.kp.works.aerospikegraph.{Constants, ValueType}
 import org.apache.hadoop.conf.Configuration
 import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 
 class EdgeDataFrame(session:SparkSession, conf:Configuration) {
 
   private val sc = session.sparkContext
+
+  def edges(): DataFrame = {
+
+    val dataframe = read()
+    /*
+     * The dataframe contains the edge entries that
+     * are aggregated to edges; as a result, all
+     * properties of an edge are aggregated into
+     * a list of [Row].
+     */
+    val aggCols = Seq(
+      Constants.PROPERTY_KEY_COL_NAME,
+      Constants.PROPERTY_TYPE_COL_NAME,
+      Constants.PROPERTY_VALUE_COL_NAME)
+
+    val groupCols = Seq(
+      Constants.ID_COL_NAME,
+      Constants.ID_TYPE_COL_NAME,
+      Constants.LABEL_COL_NAME,
+      Constants.TO_COL_NAME,
+      Constants.TO_TYPE_COL_NAME,
+      Constants.FROM_COL_NAME,
+      Constants.FROM_TYPE_COL_NAME,
+      Constants.CREATED_AT_COL_NAME,
+      Constants.UPDATED_AT_COL_NAME)
+
+    val aggStruct = struct(aggCols.map(col): _*)
+    var output = dataframe
+      .groupBy(groupCols.map(col): _*)
+      .agg(collect_list(aggStruct).as("properties"))
+    /*
+     * As a final step, the `id` columns are transformed
+     * into the right data type
+     */
+    val row = output
+      .select(Constants.ID_TYPE_COL_NAME, Constants.TO_TYPE_COL_NAME, Constants.FROM_TYPE_COL_NAME)
+      .head
+
+    val (idType, toIdType, fromIdType) = (row.getAs[String](0), row.getAs[String](1), row.getAs[String](2))
+
+    val toLong = udf((id:String) => id.toLong)
+    if (idType == ValueType.LONG.name()) {
+      output = output.withColumn(Constants.ID_COL_NAME, toLong(col(Constants.ID_COL_NAME)))
+    }
+    if (toIdType == ValueType.LONG.name()) {
+      output = output.withColumn(Constants.TO_COL_NAME, toLong(col(Constants.TO_COL_NAME)))
+    }
+    if (fromIdType == ValueType.LONG.name()) {
+      output = output.withColumn(Constants.FROM_COL_NAME, toLong(col(Constants.FROM_COL_NAME)))
+    }
+    val dropCols = Seq(
+      Constants.ID_TYPE_COL_NAME,
+      Constants.TO_TYPE_COL_NAME,
+      Constants.FROM_TYPE_COL_NAME)
+
+    output.drop(dropCols: _*)
+  }
+
   /**
    * This method reads all vertices as [AeroEdgeEntry]
    * format and returns them as a DataFrame

@@ -19,15 +19,58 @@ package de.kp.works.aerospike.dataframe
  */
 
 import de.kp.works.aerospike.hadoop.{AeroInputFormat, AeroKey, AeroRecord}
-import de.kp.works.aerospikegraph.Constants
+import de.kp.works.aerospikegraph.{Constants, ValueType}
 import org.apache.hadoop.conf.Configuration
 import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 
 class VertexDataFrame(session:SparkSession, conf:Configuration) {
 
   private val sc = session.sparkContext
+
+  def vertices():DataFrame = {
+
+    val dataframe = read()
+    /*
+     * The dataframe contains the vertex entries that
+     * are aggregated to vertices; as a result, all
+     * properties of a vertex are aggregated into
+     * a list of [Row].
+     */
+    val aggCols = Seq(
+      Constants.PROPERTY_KEY_COL_NAME,
+      Constants.PROPERTY_TYPE_COL_NAME,
+      Constants.PROPERTY_VALUE_COL_NAME)
+
+    val groupCols = Seq(
+      Constants.ID_COL_NAME,
+      Constants.ID_TYPE_COL_NAME,
+      Constants.LABEL_COL_NAME,
+      Constants.CREATED_AT_COL_NAME,
+      Constants.UPDATED_AT_COL_NAME)
+
+    val aggStruct = struct(aggCols.map(col): _*)
+    var output = dataframe
+      .groupBy(groupCols.map(col): _*)
+      .agg(collect_list(aggStruct).as("properties"))
+    /*
+     * As a final step, the `id` column is transformed
+     * into the right data type
+     */
+    val idType = output
+      .select(Constants.ID_TYPE_COL_NAME)
+      .head.getAs[String](0)
+
+    val toLong = udf((id:String) => id.toLong)
+    if (idType == ValueType.LONG.name()) {
+      output = output.withColumn(Constants.ID_COL_NAME, toLong(col(Constants.ID_COL_NAME)))
+    }
+
+    output.drop(Constants.ID_TYPE_COL_NAME)
+  }
+
   /**
    * This method reads all vertices as [AeroVertexEntry]
    * format and returns them as a DataFrame
