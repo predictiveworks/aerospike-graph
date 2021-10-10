@@ -18,7 +18,7 @@
 
         <aerospike.version>5.1.8</aerospike.version>
         <guava.version>30.1-jre</guava.version>
-        <hadoop.version>2.6.5</hadoop.version>
+        <spark.version>2.4.7</spark.version>
         <tinkerpop.version>3.5.1</tinkerpop.version>
 
         <!--
@@ -55,23 +55,15 @@
             <version>${tinkerpop.version}</version>
         </dependency>
 
-        <!-- HADOOP COMMON
+        <!-- APACHE SPARK SQL
         -->
         <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-common</artifactId>
-            <version>${hadoop.version}</version>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-sql_${scala.binary.version}</artifactId>
+            <version>${spark.version}</version>
         </dependency>
 
-        <!-- HADOOP CLIENT
-        -->
-        <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-client</artifactId>
-            <version>${hadoop.version}</version>
-        </dependency>
-
-    </dependencies>
+     </dependencies>
 
     <build>
         <sourceDirectory>src/main/scala</sourceDirectory>

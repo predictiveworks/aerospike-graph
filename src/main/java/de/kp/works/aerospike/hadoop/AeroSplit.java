@@ -25,6 +25,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
+// TODO RELOAD & CLEAN PARAMETERS
 public class AeroSplit extends InputSplit implements
         org.apache.hadoop.mapred.InputSplit {
 
@@ -38,6 +39,8 @@ public class AeroSplit extends InputSplit implements
     private String numRangeBin;
     private long numRangeBegin;
     private long numRangeEnd;
+
+    private AeroConfig config;
 
     public AeroSplit(String node, String host, int port, AeroConfig config) {
         /*
@@ -60,6 +63,9 @@ public class AeroSplit extends InputSplit implements
         this.numRangeEnd = config.getInputNumRangeEnd();
     }
 
+    public AeroConfig getConfig() {
+        return config;
+    }
     public String getType() {
         return type;
     }

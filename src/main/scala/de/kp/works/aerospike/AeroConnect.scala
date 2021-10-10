@@ -107,9 +107,9 @@ class AeroConnect(options:AeroOptions) {
       else
         Constants.EDGES
 
-    userKeys.map(userkey => {
+    userKeys.map(userKey => {
 
-      val key = new Key(namespace, s"${setname}_${postfix}", userkey)
+      val key = new Key(namespace, s"${setname}_${postfix}", userKey)
       val record = client.get(readPolicy, key)
 
       KeyRecord(key, record)

@@ -18,7 +18,9 @@ package de.kp.works.aerospikegraph;
  *
  */
 
-public class Constants {
+import java.io.Serializable;
+
+public class Constants implements Serializable {
 
     /**
      * Table names
@@ -48,7 +50,6 @@ public class Constants {
     public static final String PROPERTY_KEY_COL_NAME = "property_key";
     public static final String PROPERTY_TYPE_COL_NAME = "property_type";
     public static final String PROPERTY_VALUE_COL_NAME = "property_value";
-    public static final String BYTE_BUFFER_COL_NAME = "byte_buffer";
 
     public static final String INCLUSIVE_FROM_VALUE = "inclusive_from_value";
     public static final String EXCLUSIVE_TO_VALUE = "inclusive_to_value";

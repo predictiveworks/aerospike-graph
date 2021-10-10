@@ -64,9 +64,7 @@ public class AeroInputFormat
    public List<InputSplit> getSplits(JobContext jobContext) throws IOException {
 
         AeroConfig cfg = new AeroConfig(jobContext.getConfiguration());
-
-        // TODO
-        AerospikeClient client = null;
+        AerospikeClient client = AeroClient.getInstance(cfg);
         /*
          * Build input split with respect to the
          * existing Aerospike cluster nodes

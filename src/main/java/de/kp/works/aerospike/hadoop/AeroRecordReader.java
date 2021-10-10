@@ -18,6 +18,7 @@ package de.kp.works.aerospike.hadoop;
  *
  */
 
+import de.kp.works.aerospike.util.NamedThreadFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.mapreduce.InputSplit;
@@ -25,6 +26,7 @@ import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 import java.io.IOException;
+import java.util.Iterator;
 
 public class AeroRecordReader extends
         RecordReader<AeroKey, AeroRecord> implements
@@ -32,6 +34,11 @@ public class AeroRecordReader extends
 
     private static final Log log = LogFactory
             .getLog(AeroRecordReader.class);
+
+    private AeroKey currentKey;
+    private AeroRecord currentValue;
+
+    private Iterator<AeroKeyRecord> scanIterator;
 
     /** OLD HADOOP API
      *
@@ -41,6 +48,10 @@ public class AeroRecordReader extends
         log.info("Construct Aerospike record reader from old API.");
     }
 
+    /** NEW HADOOP API
+     *
+     * This API is used by [NewHadoopRDD]
+     */
     public AeroRecordReader(AeroSplit split) throws IOException {
         log.info("Construct Aerospike record reader from the old API.");
         prepare(split);
@@ -49,7 +60,20 @@ public class AeroRecordReader extends
     /** INTERNAL METHODS **/
 
     private void prepare(AeroSplit split) throws IOException {
-        // TODO
+        /*
+         * Build named [ThreadFactory] for this split
+         */
+        String threadGroup = "aero-hadoop" + split.getNode();
+        String scanPrefix = "scan-" + split.getNode();
+
+        NamedThreadFactory scanThreadFactory = new NamedThreadFactory(threadGroup, scanPrefix);
+        /*
+         * Build Aerospike scan reader and start scanning
+         * the provided node
+         */
+        AeroScanReader scanReader = new AeroScanReader(split.getNode(), split.getConfig());
+        scanIterator = scanReader.run(scanThreadFactory);
+
     }
 
     /** INTERFACE METHODS **/
@@ -85,13 +109,13 @@ public class AeroRecordReader extends
     }
 
     @Override
-    public AeroKey getCurrentKey() throws IOException, InterruptedException {
-        return null;
+    public AeroKey getCurrentKey() {
+        return currentKey;
     }
 
     @Override
-    public AeroRecord getCurrentValue() throws IOException, InterruptedException {
-        return null;
+    public AeroRecord getCurrentValue() {
+        return currentValue;
     }
 
     @Override

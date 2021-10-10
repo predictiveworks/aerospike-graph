@@ -24,6 +24,14 @@ public class AeroConfig {
     public static final String INPUT_NUMRANGE_BIN = "aerospike.input.numrange.bin";
     public static final String INPUT_NUMRANGE_BEGIN = "aerospike.input.numrange.begin";
     public static final String INPUT_NUMRANGE_END = "aerospike.input.numrange.end";
+    /**
+     * The timeout of an Aerospike database connection
+     * in milliseconds. Default is 1000.
+     */
+    public static final String INPUT_TIMEOUT  = "aerospike.input.timeout";
+    public static final int DEFAULT_INPUT_TIMEOUT = 1000;
+
+
     public static final long INVALID_LONG = 762492121482318889L;
 
     // ---------------- OUTPUT ----------------
@@ -88,6 +96,12 @@ public class AeroConfig {
         String setname = conf.get(INPUT_SETNAME);
         log.info("using " + INPUT_SETNAME + " = " + setname);
         return setname;
+    }
+
+    public int getInputTimeout() {
+        int timeout = conf.getInt(INPUT_TIMEOUT, DEFAULT_INPUT_TIMEOUT);
+        log.info("using " + INPUT_TIMEOUT + " = " + timeout);
+        return timeout;
     }
 
     public static void setInputBinNames(Configuration conf, String bins) {
