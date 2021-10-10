@@ -25,12 +25,14 @@ public class Constants implements Serializable {
     /**
      * Table names
      */
-    public static final String EDGES          = "edges";
-    public static final String VERTICES       = "vertices";
+    public static final String EDGES    = "edges";
+    public static final String VERTICES = "vertices";
 
     /**
      * Internal keys
      */
+    public static final String USER_KEY = "user_key";
+
     public static final String LONG_COL_TYPE    = "LONG";
     public static final String STRING_COL_TYPE  = "STRING";
 

@@ -168,7 +168,7 @@ public abstract class AeroQuery {
 
     private List<AeroEdgeEntry> parseEdges(Iterator<KeyRecord> keyRecords) {
         /*
-         * 0 : Cache key
+         * 0 : User key
          *
          * 1 : IgniteConstants.ID_COL_NAME (String)
          * 2 : IgniteConstants.ID_TYPE_COL_NAME (String)
@@ -227,6 +227,8 @@ public abstract class AeroQuery {
 
     private List<AeroVertexEntry> parseVertices(Iterator<KeyRecord> keyRecords) {
         /*
+         * 0 : User key
+         *
          * 1 : IgniteConstants.ID_COL_NAME (String)
          * 2 : IgniteConstants.ID_TYPE_COL_NAME (String)
          * 3 : IgniteConstants.LABEL_COL_NAME (String)

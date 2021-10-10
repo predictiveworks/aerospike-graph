@@ -1,5 +1,4 @@
-package de.kp.works.aerospike.rdd
-
+package de.kp.works.aerospike.dataframe
 /*
  * Copyright (c) 2019 - 2021 Dr. Krusche & Partner PartG. All rights reserved.
  *
@@ -19,16 +18,23 @@ package de.kp.works.aerospike.rdd
  *
  */
 
-import de.kp.works.aerospike.AeroEdgeEntry
 import de.kp.works.aerospike.hadoop.{AeroInputFormat, AeroKey, AeroRecord}
 import de.kp.works.aerospikegraph.Constants
 import org.apache.hadoop.conf.Configuration
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.types._
+import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 
-class EdgeRDDReader(session:SparkSession, conf:Configuration) {
+class EdgeDataFrame(session:SparkSession, conf:Configuration) {
 
   private val sc = session.sparkContext
+  /**
+   * This method reads all vertices as [AeroEdgeEntry]
+   * format and returns them as a DataFrame
+   */
+  def read():DataFrame =
+    session.createDataFrame(load(), schema())
+
   /**
    * This method loads all edges as [AeroEdgeEntry] format,
    * which is more or less schema agnostic with respect to
@@ -38,7 +44,7 @@ class EdgeRDDReader(session:SparkSession, conf:Configuration) {
    * identifier (id) is recommended in combination with
    * edge type filtering.
    */
-  def load():RDD[AeroEdgeEntry] = {
+  private def load():RDD[Row] = {
 
     try {
 
@@ -81,7 +87,7 @@ class EdgeRDDReader(session:SparkSession, conf:Configuration) {
         val propType  = record.getString(Constants.PROPERTY_TYPE_COL_NAME)
         val propValue = record.getString(Constants.PROPERTY_VALUE_COL_NAME)
 
-        new AeroEdgeEntry(
+        val values = Seq(
             userKey,
             id,
             idType,
@@ -95,6 +101,9 @@ class EdgeRDDReader(session:SparkSession, conf:Configuration) {
             propKey,
             propType,
             propValue)
+
+        Row.fromSeq(values)
+
       }
 
     } catch {
@@ -102,4 +111,23 @@ class EdgeRDDReader(session:SparkSession, conf:Configuration) {
     }
 
   }
+
+  private def schema():StructType = {
+    StructType(
+      StructField(Constants.USER_KEY, StringType, nullable = false) ::
+        StructField(Constants.ID_COL_NAME, StringType, nullable = false) ::
+        StructField(Constants.ID_TYPE_COL_NAME, StringType, nullable = false) ::
+        StructField(Constants.LABEL_COL_NAME, StringType, nullable = false) ::
+        StructField(Constants.TO_COL_NAME, StringType, nullable = false) ::
+        StructField(Constants.TO_TYPE_COL_NAME, StringType, nullable = false) ::
+        StructField(Constants.FROM_COL_NAME, StringType, nullable = false) ::
+        StructField(Constants.FROM_TYPE_COL_NAME, StringType, nullable = false) ::
+        StructField(Constants.CREATED_AT_COL_NAME, LongType, nullable = false) ::
+        StructField(Constants.UPDATED_AT_COL_NAME, LongType, nullable = false) ::
+        StructField(Constants.PROPERTY_KEY_COL_NAME, StringType, nullable = true) ::
+        StructField(Constants.PROPERTY_TYPE_COL_NAME, StringType, nullable = true) ::
+        StructField(Constants.PROPERTY_VALUE_COL_NAME, StringType, nullable = true) :: Nil
+    )
+  }
+
 }

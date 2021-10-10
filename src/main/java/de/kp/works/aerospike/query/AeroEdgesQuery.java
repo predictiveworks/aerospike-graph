@@ -18,27 +18,43 @@ package de.kp.works.aerospike.query;
  *
  */
 
+import com.aerospike.client.Record;
+import com.google.common.collect.Streams;
 import de.kp.works.aerospike.AeroConnect;
+import de.kp.works.aerospike.AeroFilter;
+import de.kp.works.aerospike.AeroFilters;
 import de.kp.works.aerospike.KeyRecord;
 import de.kp.works.aerospikegraph.Constants;
 import org.apache.tinkerpop.gremlin.structure.Direction;
 
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.*;
+import java.util.stream.Stream;
 
 public class AeroEdgesQuery extends AeroQuery {
+    /*
+     * An indicator to determine which query use
+     * case must be supported.
+     */
+    private final String queryType;
 
     public AeroEdgesQuery(String name, AeroConnect connect,
                           Object vertex, Direction direction, String... labels) {
         super(name, connect);
         /*
-         * Transform the provided properties into fields
+         * Transform the provided properties into fields;
+         * this results in a request where either from or
+         * to (depends on direction) is specified and a
+         * set of labels.
          */
         fields = new HashMap<>();
         vertexToFields(vertex, direction, fields);
 
         fields.put(Constants.LABEL_COL_NAME, String.join(",", labels));
-
+        /*
+         * This use case is described as `withLabels`, while
+         * the second use case is specified as `withLabel`.
+         */
+        queryType = "withLabels";
     }
 
     public AeroEdgesQuery(String cacheName, AeroConnect connect,
@@ -54,66 +70,88 @@ public class AeroEdgesQuery extends AeroQuery {
 
         fields.put(Constants.PROPERTY_KEY_COL_NAME, key);
         fields.put(Constants.PROPERTY_VALUE_COL_NAME, value.toString());
-
+        /*
+         * This use case is described as `withLabel`, while
+         * the first use case is specified as `withLabels`.
+         */
+        queryType = "withLabel";
     }
 
     @Override
     protected Iterator<KeyRecord> getKeyRecords() {
+        /*
+         * Edge direction is used as the leading filter condition
+         * for the Aerospike query; additional filters are all
+         * evaluated on the client side.
+         */
+        List<AeroFilter> filters = new ArrayList<>();
+        if (fields.containsKey(Constants.TO_COL_NAME)) {
+            filters.add(
+                    new AeroFilter("equal", Constants.TO_COL_NAME,
+                            fields.get(Constants.TO_COL_NAME)));
+
+        }
+        else {
+            filters.add(
+                    new AeroFilter("equal", Constants.FROM_COL_NAME,
+                            fields.get(Constants.FROM_COL_NAME)));
+
+        }
+        /*
+         * Distinguish between the supported use cases
+         */
+        if (queryType.equals("withLabels")) {
+            /*
+             * No further filter conditions can be assigned; the check
+             * whether the respective labels are contained, must be
+             * performed here.
+             */
+            Stream<String> labels =  Arrays.stream(fields.get(Constants.LABEL_COL_NAME).split(","));
+            /*
+             * Retrieve query result from Aerospike backend and
+             * prepare for further filter processing.
+             */
+            Iterator<KeyRecord> keyRecords = connect
+                    .query(setname, new AeroFilters("and", filters));
+
+            return Streams.stream(keyRecords).filter(keyRecord -> {
+
+                Record record = keyRecord.record();
+                String label = record.getString(Constants.LABEL_COL_NAME);
+
+                return labels.anyMatch(l -> l.equals(label));
+
+            }).iterator();
+
+        }
+        else if (queryType.equals("withLabel")) {
+            /*
+             * Assign label, property key and value as additional
+             * filter conditions. Note, these conditions must be
+             * evaluated on the client side, due to Aerospike's
+             * restriction to a single filter condition.
+             */
+            filters.add(
+                    new AeroFilter("equal", Constants.LABEL_COL_NAME,
+                            fields.get(Constants.LABEL_COL_NAME)));
+
+            filters.add(
+                    new AeroFilter("equal", Constants.PROPERTY_KEY_COL_NAME,
+                            fields.get(Constants.PROPERTY_KEY_COL_NAME)));
+
+            filters.add(
+                    new AeroFilter("equal", Constants.PROPERTY_VALUE_COL_NAME,
+                            fields.get(Constants.PROPERTY_VALUE_COL_NAME)));
+
+            return connect
+                    /*
+                     * Concatenate all filter conditions with
+                     * an `and` statement.
+                     */
+                    .query(setname, new AeroFilters("and", filters));
+
+        }
         return null;
     }
 
-//    @Override
-//    protected void createSql(Map<String, String> fields) {
-//        try {
-//            buildSelectPart();
-//            /*
-//             * Build `where` clause and thereby distinguish
-//             * between a single or multiple label values
-//             */
-//            if (fields.containsKey(IgniteConstants.TO_COL_NAME)) {
-//                sqlStatement += " where " + IgniteConstants.TO_COL_NAME;
-//                sqlStatement += " = '" + fields.get(IgniteConstants.TO_COL_NAME) + "'";
-//            }
-//            if (fields.containsKey(IgniteConstants.FROM_COL_NAME)) {
-//                sqlStatement += " where " + IgniteConstants.FROM_COL_NAME;
-//                sqlStatement += " = '" + fields.get(IgniteConstants.FROM_COL_NAME) + "'";
-//            }
-//            if (fields.containsKey(IgniteConstants.PROPERTY_KEY_COL_NAME)) {
-//                /*
-//                 * A query for those edges of a certain vertex that
-//                 * match a specific label and value of the selected
-//                 * property.
-//                 */
-//                sqlStatement += " and " + IgniteConstants.PROPERTY_KEY_COL_NAME;
-//                sqlStatement += " = '" + fields.get(IgniteConstants.PROPERTY_KEY_COL_NAME) + "'";
-//
-//                sqlStatement += " and " + IgniteConstants.PROPERTY_VALUE_COL_NAME;
-//                sqlStatement += " = '" + fields.get(IgniteConstants.PROPERTY_VALUE_COL_NAME) + "'";
-//
-//                sqlStatement += " and " + IgniteConstants.LABEL_COL_NAME;
-//                sqlStatement += " = '" + fields.get(IgniteConstants.LABEL_COL_NAME) + "'";
-//
-//            }
-//            else {
-//                sqlStatement += " and " + IgniteConstants.LABEL_COL_NAME;
-//                String labels = fields.get(IgniteConstants.LABEL_COL_NAME);
-//
-//                String[] tokens = labels.split(",");
-//                if (tokens.length == 1) {
-//                    sqlStatement += " = '" + tokens[0] + "'";
-//                } else {
-//                    List<String> inPart = Stream.of(tokens)
-//                            .map(token -> "'" + token + "'").collect(Collectors.toList());
-//
-//                    sqlStatement += " in(" + String.join(",", inPart) + ")";
-//                }
-//
-//            }
-//
-//
-//        } catch (Exception e) {
-//            sqlStatement = null;
-//        }
-//
-//    }
 }
