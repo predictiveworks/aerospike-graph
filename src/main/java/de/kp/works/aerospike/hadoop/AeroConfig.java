@@ -1,4 +1,22 @@
 package de.kp.works.aerospike.hadoop;
+/*
+ * Copyright (c) 2019 - 2021 Dr. Krusche & Partner PartG. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ * @author Stefan Krusche, Dr. Krusche & Partner PartG
+ *
+ */
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -7,250 +25,180 @@ import org.apache.hadoop.conf.Configuration;
 public class AeroConfig {
 
     private static final Log log = LogFactory.getLog(AeroConfig.class);
-    private final Configuration conf;
 
-    // ---------------- INPUT ----------------
+    private final String host;
+    private final int port;
+    private final String type;
+    private final String namespace;
+    private final String setname;
+    private final int timeout;
 
-    public static final String INPUT_HOST = "aerospike.input.host";
-    public static final String DEFAULT_INPUT_HOST = "localhost";
-    public static final String INPUT_PORT = "aerospike.input.port";
-    public static final int DEFAULT_INPUT_PORT = 3000;
-    public static final String INPUT_NAMESPACE = "aerospike.input.namespace";
-    public static final String INPUT_SETNAME = "aerospike.input.setname";
-    public static final String INPUT_BINNAMES = "aerospike.input.binnames";
-    public static final String DEFAULT_INPUT_BINNAMES = "";
-    public static final String INPUT_OPERATION = "aerospike.input.operation";
-    public static final String DEFAULT_INPUT_OPERATION = "scan";
-    public static final String INPUT_NUMRANGE_BIN = "aerospike.input.numrange.bin";
-    public static final String INPUT_NUMRANGE_BEGIN = "aerospike.input.numrange.begin";
-    public static final String INPUT_NUMRANGE_END = "aerospike.input.numrange.end";
+    private final String username;
+    private final String password;
+
+    private final String authMode;
+
+    private final String tlsMode;
+    private final String tlsName;
+
+    /**
+     * The Aerospike authentication mode. Values are
+     * INTERNAL, EXTERNAL, EXTERNAL_INSECURE, PKI.
+     *
+     * Default is INTERNAL
+     */
+    public static final String AEROSPIKE_AUTH_MODE = "aerospike.auth.mode";
+    public static final String DEFAULT_AEROSPIKE_AUTH_MODE = "INTERNAL";
+
+    public static final String AEROSPIKE_HOST = "aerospike.host";
+    public static final String DEFAULT_AEROSPIKE_HOST = "localhost";
+
+    public static final String AEROSPIKE_PORT = "aerospike.port";
+    public static final int DEFAULT_AEROSPIKE_PORT = 3000;
+    /**
+     * The name of the Aerospike namespace used
+     * to organize data
+     */
+    public static final String AEROSPIKE_NAMESPACE = "aerospike.namespace";
+    public static final String AEROSPIKE_SETNAME = "aerospike.setname";
+
+     public static final String AEROSPIKE_OPERATION = "aerospike.operation";
+    public static final String DEFAULT_AEROSPIKE_OPERATION = "scan";
     /**
      * The timeout of an Aerospike database connection
      * in milliseconds. Default is 1000.
      */
-    public static final String INPUT_TIMEOUT  = "aerospike.input.timeout";
-    public static final int DEFAULT_INPUT_TIMEOUT = 1000;
+    public static final String AEROSPIKE_TIMEOUT = "aerospike.timeout";
+    public static final int DEFAULT_AEROSPIKE_TIMEOUT = 1000;
+    /**
+     * Password of the registered user. Required for authentication
+     */
+    public static final String AEROSPIKE_PASSWORD = "aerospike.password";
+    /**
+     * Name of a registered user name. Required for authentication
+     */
+    public static final String  AEROSPIKE_USER = "aerospike.username";
 
+    public static final String AEROSPIKE_TLS_MODE = "aerospike.tls.mode";
+    public static final String DEFAULT_AEROSPIKE_TLS_MODE = "false";
+
+    public static final String AEROSPIKE_TLS_NAME = "aerospike.tls.name";
 
     public static final long INVALID_LONG = 762492121482318889L;
 
-    // ---------------- OUTPUT ----------------
-
-    public static final String OUTPUT_HOST = "aerospike.output.host";
-    public static final String DEFAULT_OUTPUT_HOST = "localhost";
-    public static final String OUTPUT_PORT = "aerospike.output.port";
-    public static final int DEFAULT_OUTPUT_PORT = 3000;
-    public static final String OUTPUT_NAMESPACE = "aerospike.output.namespace";
-    public static final String OUTPUT_SETNAME = "aerospike.output.setname";
-    public static final String OUTPUT_BINNAME = "aerospike.output.binname";
-    public static final String OUTPUT_KEYNAME = "aerospike.output.keyname";
-
     public AeroConfig(Configuration conf) {
-        this.conf = conf;
+
+        this.host = conf.get(AEROSPIKE_HOST, DEFAULT_AEROSPIKE_HOST);
+        log.info("using " + AEROSPIKE_HOST + " = " + host);
+
+        this.port = conf.getInt(AEROSPIKE_PORT, DEFAULT_AEROSPIKE_PORT);
+        log.info("using " + AEROSPIKE_PORT + " = " + port);
+
+        this.type = conf.get(AEROSPIKE_OPERATION, DEFAULT_AEROSPIKE_OPERATION);
+        log.info("using " + AEROSPIKE_OPERATION + " = " + type);
+
+        this.namespace = conf.get(AEROSPIKE_NAMESPACE);
+        if (namespace == null)
+            throw new UnsupportedOperationException(
+                    "No Aerospike namespace specified.");
+        log.info("using " + AEROSPIKE_NAMESPACE + " = " + namespace);
+
+        this.setname = conf.get(AEROSPIKE_SETNAME);
+        log.info("using " + AEROSPIKE_SETNAME + " = " + setname);
+
+        this.timeout = conf.getInt(AEROSPIKE_TIMEOUT, DEFAULT_AEROSPIKE_TIMEOUT);
+        log.info("using " + AEROSPIKE_TIMEOUT + " = " + timeout);
+
+        this.username = conf.get(AEROSPIKE_USER, null);
+        log.info("using " + AEROSPIKE_USER + " = " + username);
+
+        this.password = conf.get(AEROSPIKE_PASSWORD, null);
+        log.info("using " + AEROSPIKE_PASSWORD + " = " + password);
+
+        this.authMode = conf.get(AEROSPIKE_AUTH_MODE, DEFAULT_AEROSPIKE_AUTH_MODE);
+        log.info("using " + AEROSPIKE_AUTH_MODE + " = " + authMode);
+
+        this.tlsMode = conf.get(AEROSPIKE_TLS_MODE, DEFAULT_AEROSPIKE_TLS_MODE);
+        log.info("using " + AEROSPIKE_TLS_MODE + " = " + tlsMode);
+
+        this.tlsName = conf.get(AEROSPIKE_TLS_NAME, null);
+        log.info("using " + AEROSPIKE_TLS_NAME + " = " + tlsName);
+
     }
 
-    // ---------------- INPUT ----------------
+    public AeroConfig(
+            String host,
+            int port,
+            int timeout,
+            String type,
+            String namespace,
+            String setname,
+            String username,
+            String password,
+            String authMode,
+            String tlsMode,
+            String tlsName) {
 
-    public static void setInputHost(Configuration conf, String host) {
-        log.info("setting " + INPUT_HOST + " to " + host);
-        conf.set(INPUT_HOST, host);
+        this.host = host;
+        this.port = port;
+
+        this.type = type;
+
+        this.namespace = namespace;
+        this.setname = setname;
+        this.timeout = timeout;
+
+        this.username = username;
+        this.password = password;
+
+        this.authMode = authMode;
+        this.tlsMode = tlsMode;
+        this.tlsName = tlsName;
+
     }
 
-    public String getInputHost() {
-        String host = conf.get(INPUT_HOST, DEFAULT_INPUT_HOST);
-        log.info("using " + INPUT_HOST + " = " + host);
+    public String getAuthMode() {
+        return authMode;
+    }
+
+    public String getHost() {
         return host;
     }
 
-    public static void setInputPort(Configuration conf, int port) {
-        log.info("setting " + INPUT_PORT + " to " + port);
-        conf.setInt(INPUT_PORT, port);
-    }
-
-    public int getInputPort() {
-        int port = conf.getInt(INPUT_PORT, DEFAULT_INPUT_PORT);
-        log.info("using " + INPUT_PORT + " = " + port);
+    public int getPort() {
         return port;
     }
 
-    public static void setInputNamespace(Configuration conf, String namespace) {
-        log.info("setting " + INPUT_NAMESPACE + " to " + namespace);
-        conf.set(INPUT_NAMESPACE, namespace);
-    }
-
-    public String getInputNamespace() {
-        String namespace = conf.get(INPUT_NAMESPACE);
-        if (namespace == null)
-            throw new UnsupportedOperationException(
-                    "you must set the input namespace");
-        log.info("using " + INPUT_NAMESPACE + " = " + namespace);
+    public String getNamespace() {
         return namespace;
     }
 
-    public static void setInputSetName(Configuration conf, String setname) {
-        log.info("setting " + INPUT_SETNAME + " to " + setname);
-        conf.set(INPUT_SETNAME, setname);
-    }
-
-    public String getInputSetName() {
-        String setname = conf.get(INPUT_SETNAME);
-        log.info("using " + INPUT_SETNAME + " = " + setname);
+    public String getSetname() {
         return setname;
     }
 
-    public int getInputTimeout() {
-        int timeout = conf.getInt(INPUT_TIMEOUT, DEFAULT_INPUT_TIMEOUT);
-        log.info("using " + INPUT_TIMEOUT + " = " + timeout);
+    public String getOperation() {
+        return type;
+    }
+
+    public String getTlsMode() {
+        return tlsMode;
+    }
+
+    public String getTlsName() {
+        return tlsName;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public int getTimeout() {
         return timeout;
-    }
-
-    public static void setInputBinNames(Configuration conf, String bins) {
-        log.info("setting " + INPUT_BINNAMES + " to " + bins);
-        conf.set(INPUT_BINNAMES, bins);
-    }
-
-    public String[] getInputBinNames() {
-        String bins = conf.get(INPUT_BINNAMES);
-        log.info("using " + INPUT_BINNAMES + " = " + bins);
-        if (bins == null || bins.equals(""))
-            return null;
-        else
-            return bins.split(",");
-    }
-
-    public static void setInputOperation(Configuration conf, String operation) {
-        if (!operation.equals("scan") && !operation.equals("numrange"))
-            throw new UnsupportedOperationException(
-                    "input operation must be 'scan' or 'numrange'");
-        log.info("setting " + INPUT_OPERATION + " to " + operation);
-        conf.set(INPUT_OPERATION, operation);
-    }
-
-    public String getInputOperation() {
-        String operation = conf.get(INPUT_OPERATION, DEFAULT_INPUT_OPERATION);
-        if (!operation.equals("scan") && !operation.equals("numrange"))
-            throw new UnsupportedOperationException(
-                    "input operation must be 'scan' or 'numrange'");
-        log.info("using " + INPUT_OPERATION + " = " + operation);
-        return operation;
-    }
-
-    public static void setInputNumRangeBin(Configuration conf, String binname) {
-        log.info("setting " + INPUT_NUMRANGE_BIN + " to " + binname);
-        conf.set(INPUT_NUMRANGE_BIN, binname);
-    }
-
-    public String getInputNumRangeBin() {
-        String binName = conf.get(INPUT_NUMRANGE_BIN);
-        log.info("using " + INPUT_NUMRANGE_BIN + " = " + binName);
-        return binName;
-    }
-
-    public static void setInputNumRangeBegin(Configuration conf, long begin) {
-        log.info("setting " + INPUT_NUMRANGE_BEGIN + " to " + begin);
-        conf.setLong(INPUT_NUMRANGE_BEGIN, begin);
-    }
-
-    public long getInputNumRangeBegin() {
-
-        long begin = conf.getLong(INPUT_NUMRANGE_BEGIN, INVALID_LONG);
-        String operation = conf.get(INPUT_OPERATION, DEFAULT_INPUT_OPERATION);
-
-        if (begin == INVALID_LONG && operation.equals("numrange"))
-            throw new UnsupportedOperationException(
-                    "missing input numrange begin");
-        log.info("using " + INPUT_NUMRANGE_BEGIN + " = " + begin);
-        return begin;
-
-    }
-
-    public static void setInputNumRangeEnd(Configuration conf, long end) {
-        log.info("setting " + INPUT_NUMRANGE_END + " to " + end);
-        conf.setLong(INPUT_NUMRANGE_END, end);
-    }
-
-    public long getInputNumRangeEnd() {
-
-        long end = conf.getLong(INPUT_NUMRANGE_END, INVALID_LONG);
-        String operation = conf.get(INPUT_OPERATION, DEFAULT_INPUT_OPERATION);
-
-        if (end == INVALID_LONG && operation.equals("numrange"))
-            throw new UnsupportedOperationException(
-                    "missing input numrange end");
-        log.info("using " + INPUT_NUMRANGE_END + " = " + end);
-        return end;
-
-    }
-
-    // ---------------- OUTPUT ----------------
-
-    public static void setOutputHost(Configuration conf, String host) {
-        log.info("setting " + OUTPUT_HOST + " to " + host);
-        conf.set(OUTPUT_HOST, host);
-    }
-
-    public static String getOutputHost(Configuration conf) {
-        String host = conf.get(OUTPUT_HOST, DEFAULT_OUTPUT_HOST);
-        log.info("using " + OUTPUT_HOST + " = " + host);
-        return host;
-    }
-
-    public static void setOutputPort(Configuration conf, int port) {
-        log.info("setting " + OUTPUT_PORT + " to " + port);
-        conf.setInt(OUTPUT_PORT, port);
-    }
-
-    public static int getOutputPort(Configuration conf) {
-        int port = conf.getInt(OUTPUT_PORT, DEFAULT_OUTPUT_PORT);
-        log.info("using " + OUTPUT_PORT + " = " + port);
-        return port;
-    }
-
-    public static void setOutputNamespace(Configuration conf, String namespace) {
-        log.info("setting " + OUTPUT_NAMESPACE + " to " + namespace);
-        conf.set(OUTPUT_NAMESPACE, namespace);
-    }
-
-    public static String getOutputNamespace(Configuration conf) {
-        String namespace = conf.get(OUTPUT_NAMESPACE);
-        if (namespace == null)
-            throw new UnsupportedOperationException(
-                    "you must set the output namespace");
-        log.info("using " + OUTPUT_NAMESPACE + " = " + namespace);
-        return namespace;
-    }
-
-    public static void setOutputSetName(Configuration conf, String setname) {
-        log.info("setting " + OUTPUT_SETNAME + " to " + setname);
-        conf.set(OUTPUT_SETNAME, setname);
-    }
-
-    public static String getOutputSetName(Configuration conf) {
-        String setname = conf.get(OUTPUT_SETNAME);
-        log.info("using " + OUTPUT_SETNAME + " = " + setname);
-        return setname;
-    }
-
-    public static void setOutputBinName(Configuration conf, String binname) {
-        log.info("setting " + OUTPUT_BINNAME + " to " + binname);
-        conf.set(OUTPUT_BINNAME, binname);
-    }
-
-    public static String getOutputBinName(Configuration conf) {
-        String binname = conf.get(OUTPUT_BINNAME);
-        log.info("using " + OUTPUT_BINNAME + " = " + binname);
-        return binname;
-    }
-
-    public static void setOutputKeyName(Configuration conf, String keyname) {
-        log.info("setting " + OUTPUT_KEYNAME + " to " + keyname);
-        conf.set(OUTPUT_KEYNAME, keyname);
-    }
-
-    public static String getOutputKeyName(Configuration conf) {
-        String keyname = conf.get(OUTPUT_KEYNAME);
-        log.info("using " + OUTPUT_KEYNAME + " = " + keyname);
-        return keyname;
     }
 
 }

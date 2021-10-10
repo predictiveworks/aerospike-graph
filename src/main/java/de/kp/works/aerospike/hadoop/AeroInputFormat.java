@@ -52,8 +52,14 @@ public class AeroInputFormat
     */
    @Override
    public RecordReader<AeroKey, AeroRecord> createRecordReader(
-           InputSplit inputSplit, TaskAttemptContext taskAttemptContext) throws IOException {
-       return new AeroRecordReader((AeroSplit) inputSplit);
+           InputSplit inputSplit, TaskAttemptContext taskAttemptContext) {
+
+       try {
+           return new AeroRecordReader((AeroSplit) inputSplit);
+
+       } catch (Exception e) {
+           return null;
+       }
    }
 
    /**
@@ -63,13 +69,20 @@ public class AeroInputFormat
    @Override
    public List<InputSplit> getSplits(JobContext jobContext) throws IOException {
 
-        AeroConfig cfg = new AeroConfig(jobContext.getConfiguration());
-        AerospikeClient client = AeroClient.getInstance(cfg);
-        /*
+       AeroConfig cfg = new AeroConfig(jobContext.getConfiguration());
+       AerospikeClient client;
+       try {
+           client = AeroClient.getInstance(cfg);
+
+       } catch (Exception e) {
+           throw new IOException(e);
+       }
+       /*
          * Build input split with respect to the
          * existing Aerospike cluster nodes
          */
-        Node[] nodes = client.getNodes();
+       assert client != null;
+       Node[] nodes = client.getNodes();
 
         int numSplits = nodes.length;
         if (numSplits == 0) {
@@ -97,7 +110,7 @@ public class AeroInputFormat
      * This API is not used by [NewHadoopRDD]
      */
     @Override
-    public org.apache.hadoop.mapred.InputSplit[] getSplits(JobConf jobConf, int i) throws IOException {
+    public org.apache.hadoop.mapred.InputSplit[] getSplits(JobConf jobConf, int i) {
         return new org.apache.hadoop.mapred.InputSplit[0];
     }
 

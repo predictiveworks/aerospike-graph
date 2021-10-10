@@ -19,22 +19,65 @@ package de.kp.works.aerospike.hadoop;
  */
 
 import com.aerospike.client.AerospikeClient;
+import com.aerospike.client.Host;
+import com.aerospike.client.policy.AuthMode;
+import com.aerospike.client.policy.ClientPolicy;
+import com.aerospike.client.policy.TlsPolicy;
+
+import java.io.IOException;
 
 public class AeroClient {
 
     private static volatile AerospikeClient instance = null;
 
-    public static AerospikeClient getInstance(AeroConfig conf) {
+    public static AerospikeClient getInstance(AeroConfig conf) throws Exception {
         if (instance == null) {
             synchronized (AeroClient.class) {
                 if (instance == null) {
 
-                    AerospikeClient client = null;
-                    // TODO
-                    instance = client;
+                    /* Define Client Policy */
+
+                    ClientPolicy clientPolicy = new ClientPolicy();
+                    clientPolicy.timeout = conf.getTimeout();
+                    clientPolicy.failIfNotConnected = true;
+
+                    /* User authentication */
+
+                    String username = conf.getUsername();
+                    String password = conf.getPassword();
+
+                    if (username != null && password != null) {
+                        clientPolicy.user = username;
+                        clientPolicy.password = password;
+                    }
+
+                    String authValue = conf.getAuthMode();
+                    clientPolicy.authMode = AuthMode.valueOf(authValue.toUpperCase());
+
+                    String tlsMode = conf.getTlsMode().toLowerCase();
+                    String tlsName = conf.getTlsName();
+
+                    if (tlsMode.equals("true") && tlsName == null)
+                        throw new Exception("No Aerospike TLS name specified.");
+
+                    if (tlsMode.equals("true")) {
+                        /*
+                         * The current implementation leverages the
+                         * default values
+                         */
+                        clientPolicy.tlsPolicy = new TlsPolicy();
+                    }
+
+                    String host = conf.getHost();
+                    int port = conf.getPort();
+
+                    Host aerospikeHost = new Host(host, tlsName, port);
+                    instance = new AerospikeClient(clientPolicy, aerospikeHost);
+
                 }
             }
         }
+
         return instance;
     }
 }

@@ -26,10 +26,10 @@ import java.util.Iterator;
 
 public class AeroScanReader {
 
-    private String node;
-    private AeroConfig config;
+    private final String node;
+    private final AeroConfig config;
 
-    private AeroScanIterator scanIterator = new AeroScanIterator();
+    private final AeroScanIterator scanIterator = new AeroScanIterator();
 
 
     public AeroScanReader(String node, AeroConfig config) {
@@ -37,7 +37,7 @@ public class AeroScanReader {
         this.config = config;
     }
 
-    public Iterator<AeroKeyRecord> run(NamedThreadFactory scanThreadFactory) {
+    public Iterator<AeroKeyRecord> run(NamedThreadFactory scanThreadFactory) throws Exception {
         /*
          * The AeroScan implements a parallel scanning
          * approach
@@ -47,14 +47,14 @@ public class AeroScanReader {
         scanPolicy.sendKey = true;
         scanPolicy.includeBinData = true;
 
-        int timeout = config.getInputTimeout();
+        int timeout = config.getTimeout();
         scanPolicy.socketTimeout = timeout;
         scanPolicy.totalTimeout = timeout;
 
         AerospikeClient client = AeroClient.getInstance(config);
 
-        String namespace = config.getInputNamespace();
-        String setname = config.getInputSetName();
+        String namespace = config.getNamespace();
+        String setname = config.getSetname();
 
         Thread scanThread = scanThreadFactory.newThread(
             () -> {

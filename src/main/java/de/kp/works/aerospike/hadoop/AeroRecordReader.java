@@ -18,6 +18,8 @@ package de.kp.works.aerospike.hadoop;
  *
  */
 
+import com.aerospike.client.Key;
+import com.aerospike.client.Record;
 import de.kp.works.aerospike.util.NamedThreadFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,6 +41,7 @@ public class AeroRecordReader extends
     private AeroRecord currentValue;
 
     private Iterator<AeroKeyRecord> scanIterator;
+    private float progress = 0f;
 
     /** OLD HADOOP API
      *
@@ -52,14 +55,14 @@ public class AeroRecordReader extends
      *
      * This API is used by [NewHadoopRDD]
      */
-    public AeroRecordReader(AeroSplit split) throws IOException {
+    public AeroRecordReader(AeroSplit split) throws Exception {
         log.info("Construct Aerospike record reader from the old API.");
         prepare(split);
     }
 
     /** INTERNAL METHODS **/
 
-    private void prepare(AeroSplit split) throws IOException {
+    private void prepare(AeroSplit split) throws Exception {
         /*
          * Build named [ThreadFactory] for this split
          */
@@ -76,36 +79,105 @@ public class AeroRecordReader extends
 
     }
 
+    private AeroKey setCurrentKey(AeroKey currentKey, Key key) {
+
+        if (currentKey == null) {
+            currentKey = new AeroKey(key);
+        }
+
+        return currentKey;
+
+    }
+
+    private AeroRecord setCurrentValue(AeroRecord currentValue, Record record) {
+
+        if (currentValue == null) {
+            currentValue = new AeroRecord(record);
+        }
+
+        return currentValue;
+    }
+
     /** INTERFACE METHODS **/
 
     @Override
-    public boolean next(AeroKey aeroKey, AeroRecord aeroRecord) throws IOException {
-        return false;
-    }
-
-    @Override
     public AeroKey createKey() {
-        return null;
+        return new AeroKey();
     }
 
     @Override
     public AeroRecord createValue() {
-        return null;
+        return new AeroRecord();
     }
 
     @Override
-    public long getPos() throws IOException {
+    public long getPos() {
         return 0;
     }
 
     @Override
-    public void initialize(InputSplit inputSplit, TaskAttemptContext taskAttemptContext) throws IOException, InterruptedException {
+    public boolean next(AeroKey aeroKey, AeroRecord aeroRecord) throws IOException {
+
+        try {
+
+            boolean hasNext = scanIterator.hasNext();
+            if (hasNext) {
+                /*
+                 * Retrieve next entry from Scan iterator
+                 */
+                AeroKeyRecord entry = scanIterator.next();
+                if (entry == null)
+                    return false;
+                else {
+                    AeroKey nextKey = entry.key;
+                    AeroRecord nextValue = entry.rec;
+
+                    currentKey = setCurrentKey(currentKey, nextKey.toKey());
+                    currentValue = setCurrentValue(currentValue, nextValue.toRecord());
+
+                }
+            } else {
+                progress = 1f;
+                return false;
+            }
+        } catch (Exception e) {
+            throw new IOException(String.format("Reading next (key, value) failed: %s", e.getLocalizedMessage()));
+
+        }
+
+        return false;
 
     }
-
+    /**
+     * This method is used by [NewHadoopRDD]
+     */
     @Override
-    public boolean nextKeyValue() throws IOException, InterruptedException {
-        return false;
+    public void initialize(InputSplit inputSplit, TaskAttemptContext taskAttemptContext) {
+        try {
+            prepare((AeroSplit) inputSplit);
+
+        } catch (Exception e) {
+            /* Do nothing */
+        }
+    }
+    /**
+     * This method is used by [NewHadoopRDD]
+     * to retrieve key value pairs
+     */
+    @Override
+    public boolean nextKeyValue() throws IOException {
+
+        if (currentKey == null) {
+            currentKey = createKey();
+        }
+
+        if (currentValue == null) {
+            currentValue = createValue();
+        }
+        /*
+         * Delegate request to `next` interface method
+         */
+        return next(currentKey, currentValue);
     }
 
     @Override
@@ -119,12 +191,15 @@ public class AeroRecordReader extends
     }
 
     @Override
-    public float getProgress() throws IOException {
-        return 0;
+    public float getProgress() {
+        return progress;
     }
 
     @Override
     public void close() throws IOException {
-
+        /*
+         * Do nothing to do, as the Scan iterator
+         * automatically closes the thread.
+         */
     }
 }

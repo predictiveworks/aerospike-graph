@@ -25,7 +25,6 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-// TODO RELOAD & CLEAN PARAMETERS
 public class AeroSplit extends InputSplit implements
         org.apache.hadoop.mapred.InputSplit {
 
@@ -35,12 +34,14 @@ public class AeroSplit extends InputSplit implements
     private int port;
     private String namespace;
     private String setname;
-    private String[] binNames;
-    private String numRangeBin;
-    private long numRangeBegin;
-    private long numRangeEnd;
+    private int timeout;
 
-    private AeroConfig config;
+    private String username;
+    private String password;
+
+    private String authMode;
+    private String tlsMode;
+    private String tlsName;
 
     public AeroSplit(String node, String host, int port, AeroConfig config) {
         /*
@@ -52,20 +53,36 @@ public class AeroSplit extends InputSplit implements
         /*
          * Common parameters
          */
-        this.type = config.getInputOperation();
+        this.type = config.getOperation();
 
-        this.namespace = config.getInputNamespace();
-        this.setname = config.getInputSetName();
-        this.binNames = config.getInputBinNames();
+        this.namespace = config.getNamespace();
+        this.setname = config.getSetname();
 
-        this.numRangeBin = config.getInputNumRangeBin();
-        this.numRangeBegin = config.getInputNumRangeBegin();
-        this.numRangeEnd = config.getInputNumRangeEnd();
+        this.timeout = config.getTimeout();
+
+        this.username = config.getUsername();
+        this.password = config.getPassword();
+
+        this.authMode = config.getAuthMode();
+        this.tlsMode = config.getTlsMode();
+        this.tlsName = config.getTlsName();
     }
 
     public AeroConfig getConfig() {
-        return config;
+        return new AeroConfig(
+                host,
+                port,
+                timeout,
+                type,
+                namespace,
+                setname,
+                username,
+                password,
+                authMode,
+                tlsMode,
+                tlsName);
     }
+
     public String getType() {
         return type;
     }
@@ -82,28 +99,12 @@ public class AeroSplit extends InputSplit implements
         return port;
     }
 
-    public String getNameSpace() {
+    public String getNamespace() {
         return namespace;
     }
 
     public String getSetname() {
         return setname;
-    }
-
-    public String[] getBinNames() {
-        return binNames;
-    }
-
-    public String getNumRangeBin() {
-        return numRangeBin;
-    }
-
-    public long getNumRangeBegin() {
-        return numRangeBegin;
-    }
-
-    public long getNumRangeEnd() {
-        return numRangeEnd;
     }
 
     public long getLength() {
@@ -122,36 +123,29 @@ public class AeroSplit extends InputSplit implements
         out.writeInt(port);
         Text.writeString(out, namespace);
         Text.writeString(out, setname);
-        if (binNames == null) {
-            out.writeInt(0);
-        } else {
-            out.writeInt(binNames.length);
-            for (String binName : binNames)
-                Text.writeString(out, binName);
-        }
-        Text.writeString(out, numRangeBin);
-        out.writeLong(numRangeBegin);
-        out.writeLong(numRangeEnd);
+        out.writeInt(timeout);
+        Text.writeString(out, username);
+        Text.writeString(out, password);
+        Text.writeString(out, authMode);
+        Text.writeString(out, tlsMode);
+        Text.writeString(out, tlsName);
     }
 
     public void readFields(DataInput in) throws IOException {
+
         type = Text.readString(in);
         node = Text.readString(in);
         host = Text.readString(in);
         port = in.readInt();
         namespace = Text.readString(in);
         setname = Text.readString(in);
-        int nBinNames = in.readInt();
-        if (nBinNames == 0) {
-            binNames = null;
-        } else {
-            binNames = new String[nBinNames];
-            for (int ii = 0; ii < nBinNames; ++ii)
-                binNames[ii] = Text.readString(in);
-        }
-        numRangeBin = Text.readString(in);
-        numRangeBegin = in.readLong();
-        numRangeEnd = in.readLong();
+        timeout = in.readInt();
+        username = Text.readString(in);
+        password = Text.readString(in);
+        authMode = Text.readString(in);
+        tlsMode = Text.readString(in);
+        tlsName = Text.readString(in);
+
     }
 
     public String[] getLocations() {
