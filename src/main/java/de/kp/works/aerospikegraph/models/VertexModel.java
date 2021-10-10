@@ -53,15 +53,8 @@ public class VertexModel extends ElementModel {
     /** READ **/
 
     public Iterator<Vertex> vertices() {
-        /*
-         * The parser converts results from Aerospike
-         * queries to vertices.
-         */
+
         VertexReader parser = new VertexReader(graph);
-        /*
-         * The query is responsible for retrieving the
-         * requested vertices from the Aerospike cache.
-         */
         AeroQuery aeroQuery = table.getAllQuery();
 
         return aeroQuery.getResult().stream()
@@ -69,16 +62,10 @@ public class VertexModel extends ElementModel {
     }
 
     public Iterator<Vertex> vertices(Object fromId, int limit) {
-        /*
-         * The parser converts results from AeroEdgeEntry
-         * queries to vertices.
-         */
+
         final VertexReader parser = new VertexReader(graph);
-        /*
-         * The query is responsible for retrieving the
-         * requested vertices from the AeroEdgeEntry cache.
-         */
         AeroQuery igniteQuery;
+
         if (fromId == null)
             igniteQuery = table.getLimitQuery(limit);
         else
@@ -93,15 +80,8 @@ public class VertexModel extends ElementModel {
      * the same label.
      */
     public Iterator<Vertex> vertices(String label) {
-        /*
-         * The parser converts results from AeroEdgeEntry
-         * queries to vertices.
-         */
+
         VertexReader parser = new VertexReader(graph);
-        /*
-         * The query is responsible for retrieving the
-         * requested vertices from the AeroEdgeEntry cache.
-         */
         AeroQuery igniteQuery = table.getLabelQuery(label);
 
         return igniteQuery.getResult().stream()
@@ -114,15 +94,8 @@ public class VertexModel extends ElementModel {
      */
     public Iterator<Vertex> vertices(String label, String key, Object value) {
         ElementHelper.validateProperty(key, value);
-        /*
-         * The parser converts results from AeroEdgeEntry
-         * queries to vertices.
-         */
+
         VertexReader parser = new VertexReader(graph);
-        /*
-         * The query is responsible for retrieving the
-         * requested vertices from the AeroEdgeEntry cache.
-         */
         AeroQuery igniteQuery = table.getPropertyQuery(label, key, value);
 
         return igniteQuery.getResult().stream()
@@ -133,15 +106,8 @@ public class VertexModel extends ElementModel {
 
         ElementHelper.validateProperty(key, inclusiveFrom);
         ElementHelper.validateProperty(key, exclusiveTo);
-        /*
-         * The parser converts results from Ignite
-         * queries to vertices.
-         */
+
         VertexReader parser = new VertexReader(graph);
-        /*
-         * The query is responsible for retrieving the
-         * requested vertices from the Ignite cache.
-         */
         AeroQuery igniteQuery = table.getRangeQuery(label, key, inclusiveFrom, exclusiveTo);
 
         return igniteQuery.getResult().stream()
@@ -151,15 +117,8 @@ public class VertexModel extends ElementModel {
     public Iterator<Vertex> verticesWithLimit(String label, String key, Object from, int limit, boolean reversed) {
 
         ElementHelper.validateProperty(key, from != null ? from : new Object());
-        /*
-         * The parser converts results from Ignite
-         * queries to vertices.
-         */
+
         VertexReader parser = new VertexReader(graph);
-        /*
-         * The query is responsible for retrieving the
-         * requested vertices from the Ignite cache.
-         */
         AeroQuery igniteQuery = table.getLimitQuery(label, key, from, limit, reversed);
 
         return igniteQuery.getResult().stream()

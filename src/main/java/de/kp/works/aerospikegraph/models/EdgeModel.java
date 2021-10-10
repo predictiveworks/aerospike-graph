@@ -58,15 +58,8 @@ public class EdgeModel extends ElementModel {
     /** READ **/
 
     public Iterator<Edge> edges() {
-        /*
-         * The parser converts results from Ignite
-         * queries to vertices.
-         */
+
         final EdgeReader parser = new EdgeReader(graph);
-        /*
-         * The query is responsible for retrieving the
-         * requested edges from the Aerospike cache
-         */
         AeroQuery aeroQuery = table.getAllQuery();
 
         return aeroQuery.getResult().stream()
@@ -74,16 +67,10 @@ public class EdgeModel extends ElementModel {
     }
 
     public Iterator<Edge> edges(Object fromId, int limit) {
-        /*
-         * The parser converts results from Ignite
-         * queries to vertices.
-         */
+
         final EdgeReader parser = new EdgeReader(graph);
-        /*
-         * The query is responsible for retrieving the
-         * requested vertices from the Ignite cache.
-         */
         AeroQuery igniteQuery;
+
         if (fromId == null)
             igniteQuery = table.getLimitQuery(limit);
         else
@@ -97,15 +84,8 @@ public class EdgeModel extends ElementModel {
      * vertex that match direction and the provided labels
      */
     public Iterator<Edge> edges(AeroVertex vertex, Direction direction, String... labels) {
-        /*
-         * The parser converts results from Ignite
-         * queries to vertices.
-         */
+
         final EdgeReader parser = new EdgeReader(graph);
-        /*
-         * The query is responsible for retrieving the
-         * requested vertices from the Ignite cache.
-         */
         AeroQuery igniteQuery = table.getEdgesQuery(vertex, direction, labels);
 
         return igniteQuery.getResult().stream()
@@ -118,15 +98,8 @@ public class EdgeModel extends ElementModel {
      */
     public Iterator<Edge> edges(AeroVertex vertex, Direction direction, String label,
                                 String key, Object value) {
-        /*
-         * The parser converts results from Ignite
-         * queries to vertices.
-         */
+
         final EdgeReader parser = new EdgeReader(graph);
-        /*
-         * The query is responsible for retrieving the
-         * requested vertices from the Ignite cache.
-         */
         AeroQuery igniteQuery = table.getEdgesQuery(vertex, direction, label, key, value);
 
         return igniteQuery.getResult().stream()
@@ -140,15 +113,8 @@ public class EdgeModel extends ElementModel {
      */
     public Iterator<Edge> edgesInRange(AeroVertex vertex, Direction direction, String label,
                                        String key, Object inclusiveFromValue, Object exclusiveToValue) {
-        /*
-         * The parser converts results from Ignite
-         * queries to vertices.
-         */
+
         final EdgeReader parser = new EdgeReader(graph);
-        /*
-         * The query is responsible for retrieving the
-         * requested vertices from the Ignite cache.
-         */
         AeroQuery igniteQuery = table.getEdgesInRangeQuery(vertex, direction, label, key,
                 inclusiveFromValue, exclusiveToValue);
 
@@ -162,15 +128,8 @@ public class EdgeModel extends ElementModel {
      */
     public Iterator<Edge> edgesWithLimit(AeroVertex vertex, Direction direction, String label,
                                          String key, Object fromValue, int limit, boolean reversed) {
-        /*
-         * The parser converts results from Ignite
-         * queries to vertices.
-         */
+
         final EdgeReader parser = new EdgeReader(graph);
-        /*
-         * The query is responsible for retrieving the
-         * requested vertices from the Ignite cache.
-         */
         AeroQuery igniteQuery = table.getEdgesWithLimitQuery(vertex, direction, label, key,
                 fromValue, limit, reversed);
 
