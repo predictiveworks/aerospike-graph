@@ -56,11 +56,11 @@ public class AeroEdgeQuery extends AeroQuery {
          */
         List<AeroFilter> filters = new ArrayList<>();
         filters.add(
-                new AeroFilter("equal", Constants.FROM_COL_NAME,
+                new AeroFilter(Constants.EQUAL_VALUE, Constants.FROM_COL_NAME,
                         fields.get(Constants.FROM_COL_NAME)));
 
         filters.add(
-                new AeroFilter("equal", Constants.TO_COL_NAME,
+                new AeroFilter(Constants.EQUAL_VALUE, Constants.TO_COL_NAME,
                         fields.get(Constants.TO_COL_NAME)));
 
         return connect

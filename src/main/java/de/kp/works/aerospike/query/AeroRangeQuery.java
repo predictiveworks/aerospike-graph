@@ -19,11 +19,15 @@ package de.kp.works.aerospike.query;
  */
 
 import de.kp.works.aerospike.AeroConnect;
+import de.kp.works.aerospike.AeroFilter;
+import de.kp.works.aerospike.AeroFilters;
 import de.kp.works.aerospike.KeyRecord;
 import de.kp.works.aerospikegraph.Constants;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 
 public class AeroRangeQuery extends AeroQuery {
     /**
@@ -49,37 +53,32 @@ public class AeroRangeQuery extends AeroQuery {
 
     @Override
     protected Iterator<KeyRecord> getKeyRecords() {
-        return null;
-    }
+        List<AeroFilter> filters = new ArrayList<>();
+        /*
+         * The leading filter is the label filter
+         */
+        filters.add(
+                new AeroFilter(Constants.EQUAL_VALUE, Constants.LABEL_COL_NAME,
+                        fields.get(Constants.LABEL_COL_NAME)));
+        /*
+         * The second filter is on the provided property;
+         * note, it is expected that the property values
+         * are defined as numbers
+         */
+        filters.add(
+                new AeroFilter(Constants.EQUAL_VALUE, Constants.PROPERTY_KEY_COL_NAME,
+                        fields.get(Constants.PROPERTY_KEY_COL_NAME)));
 
-//    @Override
-//    protected void createSql(Map<String, String> fields) {
-//        try {
-//            buildSelectPart();
-//            /*
-//             * Build the `clause` of the SQL statement
-//             * from the provided fields
-//             */
-//            sqlStatement += " where " + Constants.LABEL_COL_NAME;
-//            sqlStatement += " = '" + fields.get(Constants.LABEL_COL_NAME) + "'";
-//
-//            sqlStatement += " and " + Constants.PROPERTY_KEY_COL_NAME;
-//            sqlStatement += " = '" + fields.get(Constants.PROPERTY_KEY_COL_NAME) + "'";
-//            /*
-//             * The value of the value column must in the range of
-//             * INCLUSIVE_FROM_VALUE >= PROPERTY_VALUE_COL_NAME < EXCLUSIVE_TO_VALUE
-//             */
-//            sqlStatement += " and " + Constants.PROPERTY_VALUE_COL_NAME;
-//            sqlStatement += " >= '" + fields.get(Constants.INCLUSIVE_FROM_VALUE) + "'";
-//
-//            sqlStatement += " and " + Constants.PROPERTY_VALUE_COL_NAME;
-//            sqlStatement += " < '" + fields.get(IgniteConstants.EXCLUSIVE_TO_VALUE) + "'";
-//
-//            sqlStatement += " order by " + IgniteConstants.PROPERTY_VALUE_COL_NAME + " ASC";
-//
-//        } catch (Exception e) {
-//            sqlStatement = null;
-//        }
-//
-//    }
+        filters.add(
+                new AeroFilter(Constants.INCLUSIVE_FROM_VALUE, Constants.PROPERTY_VALUE_COL_NAME,
+                        fields.get(Constants.INCLUSIVE_FROM_VALUE)));
+
+        filters.add(
+                new AeroFilter(Constants.EXCLUSIVE_TO_VALUE, Constants.PROPERTY_VALUE_COL_NAME,
+                        fields.get(Constants.EXCLUSIVE_TO_VALUE)));
+
+        return connect
+                .query(setname, new AeroFilters("and", filters));
+
+    }
 }

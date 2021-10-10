@@ -87,13 +87,13 @@ public class AeroEdgesQuery extends AeroQuery {
         List<AeroFilter> filters = new ArrayList<>();
         if (fields.containsKey(Constants.TO_COL_NAME)) {
             filters.add(
-                    new AeroFilter("equal", Constants.TO_COL_NAME,
+                    new AeroFilter(Constants.EQUAL_VALUE, Constants.TO_COL_NAME,
                             fields.get(Constants.TO_COL_NAME)));
 
         }
         else {
             filters.add(
-                    new AeroFilter("equal", Constants.FROM_COL_NAME,
+                    new AeroFilter(Constants.EQUAL_VALUE, Constants.FROM_COL_NAME,
                             fields.get(Constants.FROM_COL_NAME)));
 
         }
@@ -132,15 +132,15 @@ public class AeroEdgesQuery extends AeroQuery {
              * restriction to a single filter condition.
              */
             filters.add(
-                    new AeroFilter("equal", Constants.LABEL_COL_NAME,
+                    new AeroFilter(Constants.EQUAL_VALUE, Constants.LABEL_COL_NAME,
                             fields.get(Constants.LABEL_COL_NAME)));
 
             filters.add(
-                    new AeroFilter("equal", Constants.PROPERTY_KEY_COL_NAME,
+                    new AeroFilter(Constants.EQUAL_VALUE, Constants.PROPERTY_KEY_COL_NAME,
                             fields.get(Constants.PROPERTY_KEY_COL_NAME)));
 
             filters.add(
-                    new AeroFilter("equal", Constants.PROPERTY_VALUE_COL_NAME,
+                    new AeroFilter(Constants.EQUAL_VALUE, Constants.PROPERTY_VALUE_COL_NAME,
                             fields.get(Constants.PROPERTY_VALUE_COL_NAME)));
 
             return connect

@@ -26,6 +26,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 public class AeroLimitQuery extends AeroQuery {
+
+    private String queryType;
     /**
      * Retrieves a specified number of (ordered) elements
      * from the beginning of the cache. Note, this query
@@ -34,12 +36,13 @@ public class AeroLimitQuery extends AeroQuery {
     public AeroLimitQuery(String name, AeroConnect connect, int limit) {
         super(name, connect);
         /*
-         * Transform the provided properties into fields
+         * This query works for index `id` fields, either
+         * for edges or vertices
          */
         fields = new HashMap<>();
-
         fields.put(Constants.LIMIT_VALUE, String.valueOf(limit));
 
+        queryType = "withId";
     }
 
     public AeroLimitQuery(String name, AeroConnect connect, Object fromId, int limit) {
@@ -52,6 +55,7 @@ public class AeroLimitQuery extends AeroQuery {
         fields.put(Constants.FROM_ID_VALUE, fromId.toString());
         fields.put(Constants.LIMIT_VALUE, String.valueOf(limit));
 
+        queryType = "withFrom";
 
     }
 
@@ -71,6 +75,7 @@ public class AeroLimitQuery extends AeroQuery {
 
         fields.put(Constants.REVERSED_VALUE, String.valueOf(reversed));
 
+        queryType = "withProp";
     }
 
     @Override

@@ -57,15 +57,15 @@ public class AeroPropertyQuery extends AeroQuery {
          */
         List<AeroFilter> filters = new ArrayList<>();
         filters.add(
-                new AeroFilter("equal", Constants.LABEL_COL_NAME,
+                new AeroFilter(Constants.EQUAL_VALUE, Constants.LABEL_COL_NAME,
                         fields.get(Constants.LABEL_COL_NAME)));
 
         filters.add(
-                new AeroFilter("equal", Constants.PROPERTY_KEY_COL_NAME,
+                new AeroFilter(Constants.EQUAL_VALUE, Constants.PROPERTY_KEY_COL_NAME,
                         fields.get(Constants.PROPERTY_KEY_COL_NAME)));
 
         filters.add(
-                new AeroFilter("equal", Constants.PROPERTY_VALUE_COL_NAME,
+                new AeroFilter(Constants.EQUAL_VALUE, Constants.PROPERTY_VALUE_COL_NAME,
                         fields.get(Constants.PROPERTY_VALUE_COL_NAME)));
 
         return connect

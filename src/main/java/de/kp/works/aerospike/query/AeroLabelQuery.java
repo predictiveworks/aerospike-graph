@@ -52,7 +52,7 @@ public class AeroLabelQuery extends AeroQuery {
          */
         List<AeroFilter> filters = new ArrayList<>();
         filters.add(
-                new AeroFilter("equal", Constants.LABEL_COL_NAME,
+                new AeroFilter(Constants.EQUAL_VALUE, Constants.LABEL_COL_NAME,
                         fields.get(Constants.LABEL_COL_NAME)));
 
         return connect

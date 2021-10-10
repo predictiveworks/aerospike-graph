@@ -55,6 +55,7 @@ public class Constants implements Serializable {
 
     public static final String INCLUSIVE_FROM_VALUE = "inclusive_from_value";
     public static final String EXCLUSIVE_TO_VALUE = "inclusive_to_value";
+    public static final String EQUAL_VALUE = "equal";
 
     public static final String LIMIT_VALUE = "limit_value";
     public static final String FROM_VALUE = "from_value";

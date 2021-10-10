@@ -18,9 +18,10 @@ package de.kp.works.aerospike
  *
  */
 
-import com.aerospike.client.AerospikeClient
+import com.aerospike.client.{AerospikeClient, Record}
 import com.aerospike.client.policy.QueryPolicy
 import com.aerospike.client.query.{Filter, Statement}
+import de.kp.works.aerospikegraph.Constants
 
 import java.util
 import java.util.concurrent.LinkedBlockingQueue
@@ -146,10 +147,10 @@ class AeroRead(
            */
           val filter = filters.head
           filter.condition match {
-            case "equal" =>
+            case Constants.EQUAL_VALUE =>
               val f = Filter.equal(filter.name, filter.value)
               stmt.setFilter(f)
-            case _ =>
+             case _ =>
               throw new Exception(s"Filter condition `${filter.condition} is not supported.")
           }
         case "or" =>
@@ -190,17 +191,8 @@ class AeroRead(
                * Check whether all remaining conditions
                * are also fulfilled
                */
-              val matches = remaining.map(filter => {
-                filter.condition match {
-                  case "equal" =>
-                    if (record.getString(filter.name) == filter.name)
-                      0
-                    else 1
-
-                  case _ =>
-                    throw new Exception(s"Filter condition `${filter.condition} is not supported.")
-                }
-              })
+              val matches = remaining
+                .map(filter => applyFilter(record, filter))
 
               if (matches.sum == 0)
                 readIterator.put(KeyRecord(key, record))
@@ -213,7 +205,7 @@ class AeroRead(
               var matches = 0
               filters.filters.foreach(filter => {
                 filter.condition match {
-                  case "equal" =>
+                  case Constants.EQUAL_VALUE =>
                     if (record.getString(filter.name) == filter.name)
                       matches += 1
 
@@ -242,6 +234,202 @@ class AeroRead(
     }
 
     readIterator
+
+  }
+
+  private def applyFilter(record:Record, filter:AeroFilter):Int = {
+    filter.condition match {
+      case Constants.EQUAL_VALUE =>
+        if (record.getString(filter.name) == filter.name)
+          0
+        else 1
+      case Constants.INCLUSIVE_FROM_VALUE =>
+        /* `filter.name` represents PROPERTY_VALUE_COL_NAME */
+        val fieldType = getFieldType(record, filter.name)
+        fieldType match {
+          case "COUNTER" =>
+            val propValue = record.getString(filter.name).toInt
+            val filterValue = filter.value.toInt
+
+            if (propValue >= filterValue) 0 else 1
+          case "DATE" =>
+            /*
+             * 32-bit integer representing the
+             * number of DAYS since Unix epoch
+             */
+            val propValue = record.getString(filter.name).toInt
+            val filterValue = filter.value.toInt
+
+            if (propValue >= filterValue) 0 else 1
+          case "DECIMAL" =>
+            val propValue = BigDecimal(record.getString(filter.name))
+            val filterValue = BigDecimal(filter.value.toDouble)
+
+            if (propValue >= filterValue) 0 else 1
+          case "DOUBLE" =>
+            val propValue = record.getString(filter.name).toDouble
+            val filterValue = filter.value.toDouble
+
+            if (propValue >= filterValue) 0 else 1
+          case "FLOAT" =>
+            val propValue = record.getString(filter.name).toFloat
+            val filterValue = filter.value.toFloat
+
+            if (propValue >= filterValue) 0 else 1
+          case "INT" =>
+            val propValue = record.getString(filter.name).toInt
+            val filterValue = filter.value.toInt
+
+            if (propValue >= filterValue) 0 else 1
+          case "INTERVAL" =>
+            /*
+             * A value representing a period of
+             * time between two instants.
+             */
+            val propValue = record.getString(filter.name).toInt
+            val filterValue = filter.value.toInt
+
+            if (propValue >= filterValue) 0 else 1
+          case "LONG" =>
+            val propValue = record.getString(filter.name).toLong
+            val filterValue = filter.value.toLong
+
+            if (propValue >= filterValue) 0 else 1
+          case "SHORT" =>
+            val propValue = record.getString(filter.name).toShort
+            val filterValue = filter.value.toShort
+
+            if (propValue >= filterValue) 0 else 1
+          case "TIME" =>
+            /*
+             * 32-bit integer representing time
+             * of the day in milliseconds.
+             */
+            val propValue = record.getString(filter.name).toInt
+            val filterValue = filter.value.toInt
+
+            if (propValue >= filterValue) 0 else 1
+          case "TIMESTAMP" =>
+            /*
+             * 64-bit integer representing the
+             * number of milliseconds since epoch
+             */
+            val propValue = record.getString(filter.name).toLong
+            val filterValue = filter.value.toLong
+
+            if (propValue >= filterValue) 0 else 1
+          case _ =>
+            throw new Exception(s"The field type is not a number.")
+        }
+      case Constants.EXCLUSIVE_TO_VALUE =>
+        /* `filter.name` represents PROPERTY_VALUE_COL_NAME */
+        val fieldType = getFieldType(record, filter.name)
+        fieldType match {
+          case "COUNTER" =>
+            val propValue = record.getString(filter.name).toInt
+            val filterValue = filter.value.toInt
+
+            if (propValue < filterValue) 0 else 1
+          case "DATE" =>
+            /*
+             * 32-bit integer representing the
+             * number of DAYS since Unix epoch
+             */
+            val propValue = record.getString(filter.name).toInt
+            val filterValue = filter.value.toInt
+
+            if (propValue < filterValue) 0 else 1
+          case "DECIMAL" =>
+            val propValue = BigDecimal(record.getString(filter.name))
+            val filterValue = BigDecimal(filter.value.toDouble)
+
+            if (propValue < filterValue) 0 else 1
+          case "DOUBLE" =>
+            val propValue = record.getString(filter.name).toDouble
+            val filterValue = filter.value.toDouble
+
+            if (propValue < filterValue) 0 else 1
+          case "FLOAT" =>
+            val propValue = record.getString(filter.name).toFloat
+            val filterValue = filter.value.toFloat
+
+            if (propValue < filterValue) 0 else 1
+          case "INT" =>
+            val propValue = record.getString(filter.name).toInt
+            val filterValue = filter.value.toInt
+
+            if (propValue < filterValue) 0 else 1
+          case "INTERVAL" =>
+            /*
+             * A value representing a period of
+             * time between two instants.
+             */
+            val propValue = record.getString(filter.name).toInt
+            val filterValue = filter.value.toInt
+
+            if (propValue < filterValue) 0 else 1
+          case "LONG" =>
+            val propValue = record.getString(filter.name).toLong
+            val filterValue = filter.value.toLong
+
+            if (propValue < filterValue) 0 else 1
+          case "SHORT" =>
+            val propValue = record.getString(filter.name).toShort
+            val filterValue = filter.value.toShort
+
+            if (propValue < filterValue) 0 else 1
+          case "TIME" =>
+            /*
+             * 32-bit integer representing time
+             * of the day in milliseconds.
+             */
+            val propValue = record.getString(filter.name).toInt
+            val filterValue = filter.value.toInt
+
+            if (propValue < filterValue) 0 else 1
+          case "TIMESTAMP" =>
+            /*
+             * 64-bit integer representing the
+             * number of milliseconds since epoch
+             */
+            val propValue = record.getString(filter.name).toLong
+            val filterValue = filter.value.toLong
+
+            if (propValue < filterValue) 0 else 1
+          case _ =>
+            throw new Exception(s"The field type is not a number.")
+        }
+      case _ =>
+        throw new Exception(s"Filter condition `${filter.condition} is not supported.")
+
+    }
+
+  }
+
+  private def getFieldType(record:Record, field:String):String = {
+
+    field match {
+      case Constants.ID_COL_NAME =>
+        record.getString(Constants.ID_TYPE_COL_NAME)
+      case Constants.LABEL_COL_NAME =>
+        "STRING"
+      case Constants.TO_COL_NAME =>
+        record.getString(Constants.TO_TYPE_COL_NAME)
+      case Constants.FROM_COL_NAME =>
+        record.getString(Constants.FROM_TYPE_COL_NAME)
+      case Constants.CREATED_AT_COL_NAME =>
+        "LONG"
+      case Constants.UPDATED_AT_COL_NAME =>
+        "LONG"
+      case Constants.PROPERTY_KEY_COL_NAME =>
+        record.getString(Constants.PROPERTY_TYPE_COL_NAME)
+      case Constants.PROPERTY_TYPE_COL_NAME =>
+        "STRING"
+      case Constants.PROPERTY_VALUE_COL_NAME =>
+        record.getString(Constants.PROPERTY_TYPE_COL_NAME)
+      case _ =>
+        throw new Exception(s"The field `$field` is not supported.")
+    }
 
   }
 }
