@@ -24,8 +24,6 @@ import com.aerospike.client.policy.AuthMode;
 import com.aerospike.client.policy.ClientPolicy;
 import com.aerospike.client.policy.TlsPolicy;
 
-import java.io.IOException;
-
 public class AeroClient {
 
     private static volatile AerospikeClient instance = null;

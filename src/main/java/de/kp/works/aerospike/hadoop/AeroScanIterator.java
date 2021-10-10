@@ -36,7 +36,7 @@ public class AeroScanIterator implements Iterator<AeroKeyRecord>, ScanCallback {
      * A blocking queue to collect (key, record) pairs
      * from Aerospike while scanning.
      */
-    private final BlockingQueue<AeroKeyRecord> queue = new LinkedBlockingQueue<AeroKeyRecord>(100);
+    private final BlockingQueue<AeroKeyRecord> queue = new LinkedBlockingQueue<>(100);
     private AeroKeyRecord nextKeyRecord;
 
     private final AtomicBoolean closed = new AtomicBoolean(false);

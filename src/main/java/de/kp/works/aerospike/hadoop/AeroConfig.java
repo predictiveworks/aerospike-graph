@@ -84,8 +84,6 @@ public class AeroConfig {
 
     public static final String AEROSPIKE_TLS_NAME = "aerospike.tls.name";
 
-    public static final long INVALID_LONG = 762492121482318889L;
-
     public AeroConfig(Configuration conf) {
 
         this.host = conf.get(AEROSPIKE_HOST, DEFAULT_AEROSPIKE_HOST);

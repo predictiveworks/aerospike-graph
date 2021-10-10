@@ -91,18 +91,6 @@ public class AeroSplit extends InputSplit implements
         return node;
     }
 
-    public String getHost() {
-        return host;
-    }
-
-    public int getPort() {
-        return port;
-    }
-
-    public String getNamespace() {
-        return namespace;
-    }
-
     public String getSetname() {
         return setname;
     }
