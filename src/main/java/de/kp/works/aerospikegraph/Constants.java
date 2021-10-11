@@ -58,9 +58,5 @@ public class Constants implements Serializable {
     public static final String EQUAL_VALUE = "equal";
 
     public static final String LIMIT_VALUE = "limit_value";
-    public static final String FROM_VALUE = "from_value";
-    public static final String FROM_ID_VALUE = "from_id_value";
-
-    public static final String REVERSED_VALUE = "reversed_value";
 
 }

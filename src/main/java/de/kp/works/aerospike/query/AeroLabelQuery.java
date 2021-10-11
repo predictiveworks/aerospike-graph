@@ -60,7 +60,7 @@ public class AeroLabelQuery extends AeroQuery {
                  * Aerospike read query with a single
                  * filter condition
                  */
-                .query(setname, new AeroFilters("and", filters));
+                .query(setname, new AeroFilters("and", filters, -1));
 
     }
 

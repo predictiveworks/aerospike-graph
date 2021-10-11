@@ -78,7 +78,7 @@ public class AeroRangeQuery extends AeroQuery {
                         fields.get(Constants.EXCLUSIVE_TO_VALUE)));
 
         return connect
-                .query(setname, new AeroFilters("and", filters));
+                .query(setname, new AeroFilters("and", filters, -1));
 
     }
 }

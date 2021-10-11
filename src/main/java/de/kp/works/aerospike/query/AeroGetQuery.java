@@ -32,12 +32,12 @@ public class AeroGetQuery extends AeroQuery {
      * Retrieve the element (edge or vertex) that refers
      * to the provided identifier
      */
-    public AeroGetQuery(String cacheName, AeroConnect connect, Object id) {
-        super(cacheName, connect);
+    public AeroGetQuery(String name, AeroConnect connect, Object id) {
+        super(name, connect);
         /*
          * Transform the provided properties into fields
          */
-        this.fields = new HashMap<>();
+        fields = new HashMap<>();
         fields.put(Constants.ID_COL_NAME, id.toString());
 
     }

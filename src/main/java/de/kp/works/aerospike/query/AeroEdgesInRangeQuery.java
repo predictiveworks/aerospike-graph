@@ -19,22 +19,23 @@ package de.kp.works.aerospike.query;
  */
 
 import de.kp.works.aerospike.AeroConnect;
+import de.kp.works.aerospike.AeroFilter;
+import de.kp.works.aerospike.AeroFilters;
 import de.kp.works.aerospike.KeyRecord;
 import de.kp.works.aerospikegraph.Constants;
 import org.apache.tinkerpop.gremlin.structure.Direction;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 
 public class AeroEdgesInRangeQuery extends AeroQuery {
-    /**
-     * This query is restricted to the Ignite cache that
-     * contains the edges of the graph network.
-     */
-    public AeroEdgesInRangeQuery(String cacheName, AeroConnect connect,
+
+    public AeroEdgesInRangeQuery(String name, AeroConnect connect,
                                  Object vertex, Direction direction, String label,
                                  String key, Object inclusiveFromValue, Object exclusiveToValue) {
-        super(cacheName, connect);
+        super(name, connect);
         /*
          * Transform the provided properties into fields
          */
@@ -51,46 +52,42 @@ public class AeroEdgesInRangeQuery extends AeroQuery {
 
     @Override
     protected Iterator<KeyRecord> getKeyRecords() {
-        return null;
-    }
+        /*
+         * Edge direction is used as the leading filter condition
+         * for the Aerospike query; additional filters are all
+         * evaluated on the client side.
+         */
+        List<AeroFilter> filters = new ArrayList<>();
+        if (fields.containsKey(Constants.TO_COL_NAME)) {
+            filters.add(
+                    new AeroFilter(Constants.EQUAL_VALUE, Constants.TO_COL_NAME,
+                            fields.get(Constants.TO_COL_NAME)));
 
-//    @Override
-//    protected void createSql(Map<String, String> fields) {
-//        try {
-//            buildSelectPart();
-//            /*
-//             * Build `where` clause and thereby distinguish
-//             * between a single or multiple label values
-//             */
-//            if (fields.containsKey(IgniteConstants.TO_COL_NAME)) {
-//                sqlStatement += " where " + IgniteConstants.TO_COL_NAME;
-//                sqlStatement += " = '" + fields.get(IgniteConstants.TO_COL_NAME) + "'";
-//            }
-//            if (fields.containsKey(IgniteConstants.FROM_COL_NAME)) {
-//                sqlStatement += " where " + IgniteConstants.FROM_COL_NAME;
-//                sqlStatement += " = '" + fields.get(IgniteConstants.FROM_COL_NAME) + "'";
-//            }
-//
-//            sqlStatement += " and " + IgniteConstants.LABEL_COL_NAME;
-//            sqlStatement += " = '" + fields.get(IgniteConstants.LABEL_COL_NAME) + "'";
-//
-//            sqlStatement += " and " + IgniteConstants.PROPERTY_KEY_COL_NAME;
-//            sqlStatement += " = '" + fields.get(IgniteConstants.PROPERTY_KEY_COL_NAME) + "'";
-//            /*
-//             * The value of the value column must in the range of
-//             * INCLUSIVE_FROM_VALUE >= PROPERTY_VALUE_COL_NAME < EXCLUSIVE_TO_VALUE
-//             */
-//            sqlStatement += " and " + IgniteConstants.PROPERTY_VALUE_COL_NAME;
-//            sqlStatement += " >= '" + fields.get(IgniteConstants.INCLUSIVE_FROM_VALUE) + "'";
-//
-//            sqlStatement += " and " + IgniteConstants.PROPERTY_VALUE_COL_NAME;
-//            sqlStatement += " < '" + fields.get(IgniteConstants.EXCLUSIVE_TO_VALUE) + "'";
-//
-//            sqlStatement += " order by " + IgniteConstants.PROPERTY_VALUE_COL_NAME + " ASC";
-//
-//        } catch (Exception e) {
-//            sqlStatement = null;
-//        }
-//
-//    }
+        }
+        else {
+            filters.add(
+                    new AeroFilter(Constants.EQUAL_VALUE, Constants.FROM_COL_NAME,
+                            fields.get(Constants.FROM_COL_NAME)));
+
+        }
+        filters.add(
+                new AeroFilter(Constants.EQUAL_VALUE, Constants.LABEL_COL_NAME,
+                        fields.get(Constants.LABEL_COL_NAME)));
+
+        filters.add(
+                new AeroFilter(Constants.EQUAL_VALUE, Constants.PROPERTY_KEY_COL_NAME,
+                        fields.get(Constants.PROPERTY_KEY_COL_NAME)));
+
+        filters.add(
+                new AeroFilter(Constants.INCLUSIVE_FROM_VALUE, Constants.PROPERTY_VALUE_COL_NAME,
+                        fields.get(Constants.INCLUSIVE_FROM_VALUE)));
+
+        filters.add(
+                new AeroFilter(Constants.EXCLUSIVE_TO_VALUE, Constants.PROPERTY_VALUE_COL_NAME,
+                        fields.get(Constants.EXCLUSIVE_TO_VALUE)));
+
+        return connect
+                .query(setname, new AeroFilters("and", filters, -1));
+
+    }
 }

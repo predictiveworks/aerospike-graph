@@ -114,12 +114,12 @@ public class VertexModel extends ElementModel {
                 .map(parser::parse).iterator();
     }
 
-    public Iterator<Vertex> verticesWithLimit(String label, String key, Object from, int limit, boolean reversed) {
+    public Iterator<Vertex> verticesWithLimit(String label, String key, Object from, int limit) {
 
         ElementHelper.validateProperty(key, from != null ? from : new Object());
 
         VertexReader parser = new VertexReader(graph);
-        AeroQuery igniteQuery = table.getLimitQuery(label, key, from, limit, reversed);
+        AeroQuery igniteQuery = table.getLimitQuery(label, key, from, limit);
 
         return igniteQuery.getResult().stream()
                 .map(parser::parse).iterator();

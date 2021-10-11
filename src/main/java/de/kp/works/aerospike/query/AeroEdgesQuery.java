@@ -112,7 +112,7 @@ public class AeroEdgesQuery extends AeroQuery {
              * prepare for further filter processing.
              */
             Iterator<KeyRecord> keyRecords = connect
-                    .query(setname, new AeroFilters("and", filters));
+                    .query(setname, new AeroFilters("and", filters, -1));
 
             return Streams.stream(keyRecords).filter(keyRecord -> {
 
@@ -148,7 +148,7 @@ public class AeroEdgesQuery extends AeroQuery {
                      * Concatenate all filter conditions with
                      * an `and` statement.
                      */
-                    .query(setname, new AeroFilters("and", filters));
+                    .query(setname, new AeroFilters("and", filters, -1));
 
         }
         return null;

@@ -19,15 +19,19 @@ package de.kp.works.aerospike.query;
  */
 
 import de.kp.works.aerospike.AeroConnect;
+import de.kp.works.aerospike.AeroFilter;
+import de.kp.works.aerospike.AeroFilters;
 import de.kp.works.aerospike.KeyRecord;
 import de.kp.works.aerospikegraph.Constants;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 
 public class AeroLimitQuery extends AeroQuery {
 
-    private String queryType;
+    private final String queryType;
     /**
      * Retrieves a specified number of (ordered) elements
      * from the beginning of the cache. Note, this query
@@ -52,7 +56,7 @@ public class AeroLimitQuery extends AeroQuery {
          */
         fields = new HashMap<>();
 
-        fields.put(Constants.FROM_ID_VALUE, fromId.toString());
+        fields.put(Constants.FROM_COL_NAME, fromId.toString());
         fields.put(Constants.LIMIT_VALUE, String.valueOf(limit));
 
         queryType = "withFrom";
@@ -60,11 +64,9 @@ public class AeroLimitQuery extends AeroQuery {
     }
 
     public AeroLimitQuery(String name, AeroConnect connect,
-                          String label, String key, Object inclusiveFrom, int limit, boolean reversed) {
+                          String label, String key, Object inclusiveFrom, int limit) {
         super(name, connect);
-        /*
-         * Transform the provided properties into fields
-         */
+
         fields = new HashMap<>();
 
         fields.put(Constants.LABEL_COL_NAME, label);
@@ -73,50 +75,45 @@ public class AeroLimitQuery extends AeroQuery {
         fields.put(Constants.INCLUSIVE_FROM_VALUE, inclusiveFrom.toString());
         fields.put(Constants.LIMIT_VALUE, String.valueOf(limit));
 
-        fields.put(Constants.REVERSED_VALUE, String.valueOf(reversed));
-
         queryType = "withProp";
     }
 
     @Override
     protected Iterator<KeyRecord> getKeyRecords() {
-        return null;
+
+        int limit = Integer.parseInt(fields.get(Constants.LIMIT_VALUE));
+        List<AeroFilter> filters = new ArrayList<>();
+
+        if (queryType.equals("withId")) {
+            return connect
+                    .query(setname, new AeroFilters("and", filters, limit));
+        }
+        else if (queryType.equals("withFrom")) {
+            filters.add(
+                    new AeroFilter(Constants.EQUAL_VALUE, Constants.FROM_COL_NAME,
+                            fields.get(Constants.FROM_COL_NAME)));
+
+            return connect
+                    .query(setname, new AeroFilters("and", filters, limit));
+        }
+        else {
+            filters.add(
+                    new AeroFilter(Constants.EQUAL_VALUE, Constants.LABEL_COL_NAME,
+                            fields.get(Constants.LABEL_COL_NAME)));
+
+            filters.add(
+                    new AeroFilter(Constants.EQUAL_VALUE, Constants.PROPERTY_KEY_COL_NAME,
+                            fields.get(Constants.PROPERTY_KEY_COL_NAME)));
+
+            filters.add(
+                    new AeroFilter(Constants.INCLUSIVE_FROM_VALUE, Constants.PROPERTY_VALUE_COL_NAME,
+                            fields.get(Constants.INCLUSIVE_FROM_VALUE)));
+
+            return connect
+                    .query(setname, new AeroFilters("and", filters, limit));
+
+        }
+
     }
 
-//    @Override
-//    protected void createSql(Map<String, String> fields) {
-//        try {
-//            buildSelectPart();
-//            /*
-//             * Build the `clause` of the SQL statement
-//             * from the provided fields
-//             */
-//            sqlStatement += " where " + IgniteConstants.LABEL_COL_NAME;
-//            sqlStatement += " = '" + fields.get(IgniteConstants.LABEL_COL_NAME) + "'";
-//
-//            sqlStatement += " and " + IgniteConstants.PROPERTY_KEY_COL_NAME;
-//            sqlStatement += " = '" + fields.get(IgniteConstants.PROPERTY_KEY_COL_NAME) + "'";
-//            /*
-//             * The value of the value column must in the range of
-//             * INCLUSIVE_FROM_VALUE >= PROPERTY_VALUE_COL_NAME
-//             */
-//            sqlStatement += " and " + IgniteConstants.PROPERTY_VALUE_COL_NAME;
-//            sqlStatement += " >= '" + fields.get(IgniteConstants.INCLUSIVE_FROM_VALUE) + "'";
-//            /*
-//             * Determine sorting order
-//             */
-//            if (fields.get(IgniteConstants.REVERSED_VALUE).equals("true")) {
-//                sqlStatement += " order by " + IgniteConstants.PROPERTY_VALUE_COL_NAME + " DESC";
-//            }
-//            else {
-//                sqlStatement += " order by " + IgniteConstants.PROPERTY_VALUE_COL_NAME + " ASC";
-//            }
-//
-//            sqlStatement += " limit " + fields.get(IgniteConstants.LIMIT_VALUE);
-//
-//        } catch (Exception e) {
-//            sqlStatement = null;
-//        }
-//
-//    }
 }

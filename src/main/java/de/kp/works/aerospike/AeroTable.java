@@ -226,8 +226,8 @@ public class AeroTable extends AeroBaseTable {
         return new AeroLimitQuery(name, connect, fromId, limit);
     }
 
-    public AeroQuery getLimitQuery(String label, String key, Object inclusiveFrom, int limit, boolean reversed) {
-        return new AeroLimitQuery(name, connect, label, key, inclusiveFrom, limit, reversed);    }
+    public AeroQuery getLimitQuery(String label, String key, Object inclusiveFrom, int limit) {
+        return new AeroLimitQuery(name, connect, label, key, inclusiveFrom, limit);    }
     /**
      * Returns an [AeroQuery] to retrieve all elements
      * that are referenced by a certain label and share
@@ -274,10 +274,4 @@ public class AeroTable extends AeroBaseTable {
                 key, inclusiveFromValue, exclusiveToValue);
     }
 
-    public AeroQuery getEdgesWithLimitQuery(AeroVertex vertex, Direction direction, String label,
-                                            String key, Object fromValue, int limit, boolean reversed) {
-        return new AeroEdgesWithLimitQuery(name, connect, vertex.id(), direction, label,
-                key, fromValue, limit, reversed);
-
-    }
 }

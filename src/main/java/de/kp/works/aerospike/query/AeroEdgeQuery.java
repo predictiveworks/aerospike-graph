@@ -35,8 +35,8 @@ public class AeroEdgeQuery extends AeroQuery {
      * `from` and `to `identifier. A use case for this
      * query is the OpenCTI transformer
      */
-    public AeroEdgeQuery(String cacheName, AeroConnect connect, Object fromId, Object toId) {
-        super(cacheName, connect);
+    public AeroEdgeQuery(String name, AeroConnect connect, Object fromId, Object toId) {
+        super(name, connect);
         /*
          * Transform the provided properties into fields
          */
@@ -68,7 +68,7 @@ public class AeroEdgeQuery extends AeroQuery {
                  * Aerospike read query with two filter
                  * conditions combined with `and`.
                  */
-                .query(setname, new AeroFilters("and", filters));
+                .query(setname, new AeroFilters("and", filters, -1));
 
     }
 

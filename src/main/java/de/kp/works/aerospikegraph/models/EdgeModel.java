@@ -122,21 +122,6 @@ public class EdgeModel extends ElementModel {
                 .map(parser::parse).iterator();
     }
     /**
-     * Method to retrieve all edges that refer to the provided
-     * vertex and match direction, label, property and a range
-     * of property values with a start value and a limit
-     */
-    public Iterator<Edge> edgesWithLimit(AeroVertex vertex, Direction direction, String label,
-                                         String key, Object fromValue, int limit, boolean reversed) {
-
-        final EdgeReader parser = new EdgeReader(graph);
-        AeroQuery igniteQuery = table.getEdgesWithLimitQuery(vertex, direction, label, key,
-                fromValue, limit, reversed);
-
-        return igniteQuery.getResult().stream()
-                .map(parser::parse).iterator();
-    }
-    /**
      * Method to retrieve all vertices that refer to the provided
      * vertex that can be reached via related edges
      */
@@ -154,12 +139,6 @@ public class EdgeModel extends ElementModel {
     public Iterator<Vertex> verticesInRange(AeroVertex vertex, Direction direction, String label,
                                             String edgeKey, Object inclusiveFromEdgeValue, Object exclusiveToEdgeValue) {
         Iterator<Edge> edges = edgesInRange(vertex, direction, label, edgeKey, inclusiveFromEdgeValue, exclusiveToEdgeValue);
-        return edgesToVertices(vertex, edges);
-    }
-
-    public Iterator<Vertex> verticesWithLimit(AeroVertex vertex, Direction direction, String label,
-                                              String edgeKey, Object fromEdgeValue, int limit, boolean reversed) {
-        Iterator<Edge> edges = edgesWithLimit(vertex, direction, label, edgeKey, fromEdgeValue, limit, reversed);
         return edgesToVertices(vertex, edges);
     }
 

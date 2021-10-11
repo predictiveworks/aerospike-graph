@@ -178,16 +178,6 @@ public class AeroVertex extends GraphElement implements Vertex {
         return graph.getEdgeModel().edgesInRange(this, direction, label, key, inclusiveFromValue, exclusiveToValue);
     }
 
-    public Iterator<Edge> edgesWithLimit(final Direction direction, final String label, final String key,
-                                         final Object fromValue, final int limit) {
-        return edgesWithLimit(direction, label, key, fromValue, limit, false);
-    }
-
-    public Iterator<Edge> edgesWithLimit(final Direction direction, final String label, final String key,
-                                         final Object fromValue, final int limit, final boolean reversed) {
-        return graph.getEdgeModel().edgesWithLimit(this, direction, label, key, fromValue, limit, reversed);
-    }
-
     /** VERTEX RELATED **/
 
     @Override
@@ -202,16 +192,6 @@ public class AeroVertex extends GraphElement implements Vertex {
     public Iterator<Vertex> verticesInRange(final Direction direction, final String label, final String key,
                                             final Object inclusiveFromValue, final Object exclusiveToValue) {
         return graph.getEdgeModel().verticesInRange(this, direction, label, key, inclusiveFromValue, exclusiveToValue);
-    }
-
-    public Iterator<Vertex> verticesWithLimit(final Direction direction, final String label, final String key,
-                                              final Object fromValue, final int limit) {
-        return verticesWithLimit(direction, label, key, fromValue, limit, false);
-    }
-
-    public Iterator<Vertex> verticesWithLimit(final Direction direction, final String label, final String key,
-                                              final Object fromValue, final int limit, final boolean reversed) {
-        return graph.getEdgeModel().verticesWithLimit(this, direction, label, key, fromValue, limit, reversed);
     }
 
     @Override

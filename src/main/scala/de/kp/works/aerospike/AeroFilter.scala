@@ -21,7 +21,7 @@ package de.kp.works.aerospike
 import java.util
 import scala.collection.JavaConversions._
 
-case class AeroFilters(condition:String, filters:util.List[AeroFilter]) {
+case class AeroFilters(condition:String, filters:util.List[AeroFilter], limit:Int = -1) {
 
   def head:AeroFilter = filters.head
 

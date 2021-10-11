@@ -73,7 +73,7 @@ public class AeroPropertyQuery extends AeroQuery {
                  * Aerospike read query with three filter
                  * conditions combined with `and`.
                  */
-                .query(setname, new AeroFilters("and", filters));
+                .query(setname, new AeroFilters("and", filters, -1));
 
     }
 }

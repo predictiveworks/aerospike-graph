@@ -62,7 +62,7 @@ public class AeroEdgesExistQuery extends AeroQuery {
                  * Aerospike read query with two filter
                  * conditions combined with `or`.
                  */
-                .query(setname, new AeroFilters("or", filters));
+                .query(setname, new AeroFilters("or", filters, -1));
 
 
     }

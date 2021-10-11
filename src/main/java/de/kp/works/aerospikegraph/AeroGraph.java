@@ -288,11 +288,7 @@ public class AeroGraph implements Graph {
     }
 
     public Iterator<Vertex> verticesWithLimit(String label, String key, Object fromValue, int limit) {
-        return verticesWithLimit(label, key, fromValue, limit, false);
-    }
-
-    public Iterator<Vertex> verticesWithLimit(String label, String key, Object fromValue, int limit, boolean reversed) {
-        return vertexModel.verticesWithLimit(label, key, fromValue, limit, reversed);
+        return vertexModel.verticesWithLimit(label, key, fromValue, limit);
     }
 
     /** EDGE METHODS (see EdgeModel) **/
