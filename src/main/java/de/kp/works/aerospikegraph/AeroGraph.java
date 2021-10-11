@@ -92,8 +92,14 @@ public class AeroGraph implements Graph {
         this.config = config;
         this.features = new AeroFeatures(true);
 
-        // TODO
-        AeroConnect connect = null;
+        /* Build Aerospike configuration */
+        AeroConnect connect = AeroConnect.getInstance(config);
+
+        /* SECONDARY INDEX CREATION */
+
+        AeroIndex aeroIndex = new AeroIndex(connect);
+        aeroIndex.edgeIndices();
+        aeroIndex.vertexIndices();
 
         /* EDGE INITIALIZATION */
 
@@ -119,8 +125,6 @@ public class AeroGraph implements Graph {
                 .build();
 
     }
-
-    // **********
 
     @Override
     public <C extends GraphComputer> C compute(final Class<C> graphComputerClass) {
@@ -296,6 +300,7 @@ public class AeroGraph implements Graph {
     public EdgeModel getEdgeModel() {
         return edgeModel;
     }
+
     @Override
     public Iterator<Edge> edges(Object... edgeIds) {
 

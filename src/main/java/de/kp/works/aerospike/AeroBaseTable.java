@@ -53,10 +53,6 @@ public class AeroBaseTable {
         }
         else
             elementType = ElementType.UNDEFINED;
-        /*
-         * Create Aerospike cache of not exists
-         */
-        connect.getOrCreateCache(name);
 
     }
 

@@ -137,6 +137,10 @@ public class AeroConfiguration extends AbstractConfiguration implements Serializ
         return conf.getLong(AeroConfiguration.Keys.GLOBAL_CACHE_TTL_SECS, 60);
     }
 
+    public PropertiesConfiguration getConf() {
+        return conf;
+    }
+
     @Override
     protected void addPropertyDirect(String key, Object value) {
         conf.setProperty(key, value);

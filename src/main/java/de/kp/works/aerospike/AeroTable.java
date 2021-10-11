@@ -87,7 +87,7 @@ public class AeroTable extends AeroBaseTable {
         }
     }
 
-    public Object increment(AeroIncrement aeroIncrement) throws Exception {
+    public Object increment(AeroIncrement aeroIncrement) {
 
         if (connect == null) return false;
         if (connect.getClient() == null) return false;

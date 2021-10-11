@@ -170,61 +170,79 @@ class AeroRead(
      * Retrieve read cursor
      */
     val rs = client.query(queryPolicy, stmt)
+    /*
+     * Evaluate cursor and thereby mimic limitation
+     */
+    val limited = filters.limit != -1
+    val limit = filters.limit
+    /*
+     * Flag to indicate whether the specified
+     * limit has been reached
+     */
+    var terminate = false
     try {
 
-      while (rs.next()) {
-
-        val key = rs.getKey
-        val record = rs.getRecord
+      while (rs.next() && !terminate) {
         /*
-         * Check whether there are additional filters
-         * that must be applied
+         * Check whether we have to terminate
+         * due to provided limitations
          */
-        if (remaining.nonEmpty) {
+        if (limited && readIterator.size == limit)
+          terminate = true
+
+        if (!terminate) {
+          val key = rs.getKey
+          val record = rs.getRecord
           /*
-           * The received records are fulfill the primary
-           * filter condition
+           * Check whether there are additional filters
+           * that must be applied
            */
-          filters.condition match {
-            case "and" =>
-              /*
-               * Check whether all remaining conditions
-               * are also fulfilled
-               */
-              val matches = remaining
-                .map(filter => applyFilter(record, filter))
+          if (remaining.nonEmpty) {
+            /*
+             * The received records are fulfill the primary
+             * filter condition
+             */
+            filters.condition match {
+              case "and" =>
+                /*
+                 * Check whether all remaining conditions
+                 * are also fulfilled
+                 */
+                val matches = remaining
+                  .map(filter => applyFilter(record, filter))
 
-              if (matches.sum == 0)
-                readIterator.put(KeyRecord(key, record))
+                if (matches.sum == 0)
+                  readIterator.put(KeyRecord(key, record))
 
-            case "or" =>
-              /*
-               * The filter conditions have to be applied
-               * to the query result
-               */
-              var matches = 0
-              filters.filters.foreach(filter => {
-                filter.condition match {
-                  case Constants.EQUAL_VALUE =>
-                    if (record.getString(filter.name) == filter.name)
-                      matches += 1
+              case "or" =>
+                /*
+                 * The filter conditions have to be applied
+                 * to the query result
+                 */
+                var matches = 0
+                filters.filters.foreach(filter => {
+                  filter.condition match {
+                    case Constants.EQUAL_VALUE =>
+                      if (record.getString(filter.name) == filter.name)
+                        matches += 1
 
-                  case _ =>
-                    throw new Exception(s"Filter condition `${filter.condition} is not supported.")
-                }
+                    case _ =>
+                      throw new Exception(s"Filter condition `${filter.condition} is not supported.")
+                  }
 
-              })
+                })
 
-              if (matches > 0)
-                readIterator.put(KeyRecord(key, record))
+                if (matches > 0)
+                  readIterator.put(KeyRecord(key, record))
 
-            case _ =>
-              throw new Exception(s"Filters condition `${filters.condition} is not supported.")
+              case _ =>
+                throw new Exception(s"Filters condition `${filters.condition} is not supported.")
 
+            }
           }
+          else
+            readIterator.put(KeyRecord(key, record))
         }
-        else
-          readIterator.put(KeyRecord(key, record))
 
       }
     } finally {

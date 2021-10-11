@@ -22,7 +22,7 @@ import com.aerospike.client.{AerospikeClient, Bin, Host, Key}
 import com.aerospike.client.policy.{ClientPolicy, RecordExistsAction, TlsPolicy, WritePolicy}
 import com.aerospike.client.query.Filter
 import de.kp.works.aerospike.util.NamedThreadFactory
-import de.kp.works.aerospikegraph.{Constants, ElementType}
+import de.kp.works.aerospikegraph.{AeroConfiguration, Constants, ElementType}
 import org.apache.commons.configuration2.PropertiesConfiguration
 
 import java.util
@@ -33,9 +33,9 @@ object AeroConnect {
   private var instance:Option[AeroConnect] = None
   private var options:Option[AeroOptions] = None
 
-  def getInstance(config: PropertiesConfiguration): AeroConnect = {
+  def getInstance(config: AeroConfiguration): AeroConnect = {
 
-    options = Some(new AeroOptions(config))
+    options = Some(new AeroOptions(config.getConf))
 
     if (instance.isEmpty)
       instance = Some(new AeroConnect(options.get))
@@ -65,7 +65,7 @@ class AeroConnect(options:AeroOptions) {
   private var clientPolicy:ClientPolicy = _
   private var writePolicy:WritePolicy = _
 
-  private val namespace = options.getNamespace
+  val namespace: String = options.getNamespace
   val setname: String = options.getSetname
 
   private val timeout = options.getTimeout
@@ -74,7 +74,7 @@ class AeroConnect(options:AeroOptions) {
 
   def getClient:AerospikeClient = client
 
-  def getOrCreateCache(name:String) = ???
+  def getWritePolicy:WritePolicy = writePolicy
 
   /** AEROSPIKE ACCESS METHODS **/
 

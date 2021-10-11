@@ -170,18 +170,18 @@ public abstract class AeroQuery {
         /*
          * 0 : User key
          *
-         * 1 : IgniteConstants.ID_COL_NAME (String)
-         * 2 : IgniteConstants.ID_TYPE_COL_NAME (String)
-         * 3 : IgniteConstants.LABEL_COL_NAME (String)
-         * 4 : IgniteConstants.TO_COL_NAME (String)
-         * 5 : IgniteConstants.TO_TYPE_COL_NAME (String)
-         * 6 : IgniteConstants.FROM_COL_NAME (String)
-         * 7 : IgniteConstants.FROM_TYPE_COL_NAME (String)
-         * 8 : IgniteConstants.CREATED_AT_COL_NAME (Long)
-         * 9 : IgniteConstants.UPDATED_AT_COL_NAME (Long)
-         * 10: IgniteConstants.PROPERTY_KEY_COL_NAME (String)
-         * 11: IgniteConstants.PROPERTY_TYPE_COL_NAME (String)
-         * 12: IgniteConstants.PROPERTY_VALUE_COL_NAME (String)
+         * 1 : Constants.ID_COL_NAME (String)
+         * 2 : Constants.ID_TYPE_COL_NAME (String)
+         * 3 : Constants.LABEL_COL_NAME (String)
+         * 4 : Constants.TO_COL_NAME (String)
+         * 5 : Constants.TO_TYPE_COL_NAME (String)
+         * 6 : Constants.FROM_COL_NAME (String)
+         * 7 : Constants.FROM_TYPE_COL_NAME (String)
+         * 8 : Constants.CREATED_AT_COL_NAME (Long)
+         * 9 : Constants.UPDATED_AT_COL_NAME (Long)
+         * 10: Constants.PROPERTY_KEY_COL_NAME (String)
+         * 11: Constants.PROPERTY_TYPE_COL_NAME (String)
+         * 12: Constants.PROPERTY_VALUE_COL_NAME (String)
          */
         return Streams.stream(keyRecords).map(keyRecord -> {
 
@@ -229,14 +229,14 @@ public abstract class AeroQuery {
         /*
          * 0 : User key
          *
-         * 1 : IgniteConstants.ID_COL_NAME (String)
-         * 2 : IgniteConstants.ID_TYPE_COL_NAME (String)
-         * 3 : IgniteConstants.LABEL_COL_NAME (String)
-         * 4 : IgniteConstants.CREATED_AT_COL_NAME (Long)
-         * 5 : IgniteConstants.UPDATED_AT_COL_NAME (Long)
-         * 6 : IgniteConstants.PROPERTY_KEY_COL_NAME (String)
-         * 7 : IgniteConstants.PROPERTY_TYPE_COL_NAME (String)
-         * 8 : IgniteConstants.PROPERTY_VALUE_COL_NAME (String)
+         * 1 : Constants.ID_COL_NAME (String)
+         * 2 : Constants.ID_TYPE_COL_NAME (String)
+         * 3 : Constants.LABEL_COL_NAME (String)
+         * 4 : Constants.CREATED_AT_COL_NAME (Long)
+         * 5 : Constants.UPDATED_AT_COL_NAME (Long)
+         * 6 : Constants.PROPERTY_KEY_COL_NAME (String)
+         * 7 : Constants.PROPERTY_TYPE_COL_NAME (String)
+         * 8 : Constants.PROPERTY_VALUE_COL_NAME (String)
          */
         return Streams.stream(keyRecords).map(keyRecord -> {
 
