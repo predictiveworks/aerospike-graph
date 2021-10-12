@@ -18,18 +18,25 @@ package de.kp.works.aerospike.gremlin.jsr223;
  *
  */
 
+import de.kp.works.aerospike.gremlin.*;
 import org.apache.tinkerpop.gremlin.jsr223.AbstractGremlinPlugin;
 import org.apache.tinkerpop.gremlin.jsr223.DefaultImportCustomizer;
 import org.apache.tinkerpop.gremlin.jsr223.ImportCustomizer;
 
 public class AerospikeGraphGremlinPlugin extends AbstractGremlinPlugin {
 
-    private static final String NAME = "de.kp.works.aerospikegraph";
+    private static final String NAME = "de.kp.works.aerospike.gremlin";
 
     private static final ImportCustomizer imports = DefaultImportCustomizer.build()
             .addClassImports(
-
-            )
+                    AeroEdge.class,
+                    GraphElement.class,
+                    AeroGraph.class,
+                    AeroConfiguration.class,
+                    AeroFeatures.class,
+                    GraphProperty.class,
+                    AeroVertex.class,
+                    AeroVertexProperty.class)
             .create();
 
     private static final AerospikeGraphGremlinPlugin instance = new AerospikeGraphGremlinPlugin();
