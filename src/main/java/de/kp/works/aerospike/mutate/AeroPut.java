@@ -19,7 +19,7 @@ package de.kp.works.aerospike.mutate;
  */
 
 import de.kp.works.aerospike.AeroColumn;
-import de.kp.works.aerospikegraph.ElementType;
+import de.kp.works.aerospike.gremlin.ElementType;
 
 public class AeroPut extends AeroMutation {
 

@@ -19,7 +19,7 @@ package de.kp.works.aerospike.dataframe
  */
 
 import de.kp.works.aerospike.hadoop.{AeroInputFormat, AeroKey, AeroRecord}
-import de.kp.works.aerospikegraph.{Constants, ValueType}
+import de.kp.works.aerospike.gremlin.{Constants, ValueType}
 import org.apache.hadoop.conf.Configuration
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.functions._

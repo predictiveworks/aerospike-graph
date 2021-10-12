@@ -19,8 +19,8 @@ package de.kp.works.aerospike.mutate;
  */
 
 import de.kp.works.aerospike.AeroColumn;
-import de.kp.works.aerospikegraph.Constants;
-import de.kp.works.aerospikegraph.ElementType;
+import de.kp.works.aerospike.gremlin.Constants;
+import de.kp.works.aerospike.gremlin.ElementType;
 
 import java.util.ArrayList;
 import java.util.List;

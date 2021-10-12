@@ -21,7 +21,7 @@ package de.kp.works.aerospike
 import com.aerospike.client.{AerospikeClient, Record}
 import com.aerospike.client.policy.QueryPolicy
 import com.aerospike.client.query.{Filter, Statement}
-import de.kp.works.aerospikegraph.Constants
+import de.kp.works.aerospike.gremlin.Constants
 
 import java.util
 import java.util.concurrent.LinkedBlockingQueue

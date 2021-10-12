@@ -19,7 +19,7 @@ package de.kp.works.aerospike.query;
  */
 
 import de.kp.works.aerospike.AeroColumn;
-import de.kp.works.aerospikegraph.Constants;
+import de.kp.works.aerospike.gremlin.Constants;
 
 import java.util.ArrayList;
 import java.util.List;

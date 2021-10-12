@@ -20,8 +20,8 @@ package de.kp.works.aerospike;
 
 import de.kp.works.aerospike.mutate.*;
 import de.kp.works.aerospike.query.*;
-import de.kp.works.aerospikegraph.AeroVertex;
-import de.kp.works.aerospikegraph.ElementType;
+import de.kp.works.aerospike.gremlin.AeroVertex;
+import de.kp.works.aerospike.gremlin.ElementType;
 import org.apache.tinkerpop.gremlin.structure.Direction;
 
 import java.util.List;

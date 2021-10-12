@@ -22,7 +22,7 @@ import com.aerospike.client.{AerospikeClient, Bin, Host, Key}
 import com.aerospike.client.policy.{ClientPolicy, RecordExistsAction, TlsPolicy, WritePolicy}
 import com.aerospike.client.query.Filter
 import de.kp.works.aerospike.util.NamedThreadFactory
-import de.kp.works.aerospikegraph.{AeroConfiguration, Constants, ElementType}
+import de.kp.works.aerospike.gremlin.{AeroConfiguration, Constants, ElementType}
 import org.apache.commons.configuration2.PropertiesConfiguration
 
 import java.util

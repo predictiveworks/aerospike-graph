@@ -20,7 +20,7 @@ package de.kp.works.aerospike.query;
 
 import de.kp.works.aerospike.AeroConnect;
 import de.kp.works.aerospike.KeyRecord;
-import de.kp.works.aerospikegraph.Constants;
+import de.kp.works.aerospike.gremlin.Constants;
 
 import java.util.HashMap;
 import java.util.Iterator;

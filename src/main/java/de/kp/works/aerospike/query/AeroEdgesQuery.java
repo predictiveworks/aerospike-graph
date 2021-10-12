@@ -24,7 +24,7 @@ import de.kp.works.aerospike.AeroConnect;
 import de.kp.works.aerospike.AeroFilter;
 import de.kp.works.aerospike.AeroFilters;
 import de.kp.works.aerospike.KeyRecord;
-import de.kp.works.aerospikegraph.Constants;
+import de.kp.works.aerospike.gremlin.Constants;
 import org.apache.tinkerpop.gremlin.structure.Direction;
 
 import java.util.*;

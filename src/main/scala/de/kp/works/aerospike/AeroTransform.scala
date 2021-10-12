@@ -19,7 +19,7 @@ package de.kp.works.aerospike
  */
 
 import de.kp.works.aerospike.query.AeroResult
-import de.kp.works.aerospikegraph.{Constants, ValueType}
+import de.kp.works.aerospike.gremlin.{Constants, ValueType}
 
 import scala.collection.JavaConversions._
 

@@ -26,9 +26,9 @@ import de.kp.works.aerospike.mutate.AeroPut;
 import de.kp.works.aerospike.query.AeroEdgeQuery;
 import de.kp.works.aerospike.query.AeroEdgesExistQuery;
 import de.kp.works.aerospike.query.AeroGetQuery;
-import de.kp.works.aerospikegraph.Constants;
-import de.kp.works.aerospikegraph.ElementType;
-import de.kp.works.aerospikegraph.ValueType;
+import de.kp.works.aerospike.gremlin.Constants;
+import de.kp.works.aerospike.gremlin.ElementType;
+import de.kp.works.aerospike.gremlin.ValueType;
 
 import java.util.*;
 import java.util.stream.Collectors;

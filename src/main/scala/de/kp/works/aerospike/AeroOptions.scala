@@ -19,7 +19,7 @@ package de.kp.works.aerospike
  */
 
 import com.aerospike.client.policy.AuthMode
-import de.kp.works.aerospikegraph.AeroConfiguration.Keys
+import de.kp.works.aerospike.gremlin.AeroConfiguration.Keys
 import org.apache.commons.configuration2.PropertiesConfiguration
 
 class AeroOptions(config:PropertiesConfiguration) {
